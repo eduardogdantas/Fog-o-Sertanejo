@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema CUMMINS - Atendimento</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f4f6f9;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 1. ABAS SUPERIORES */
+        .abas-container {
+            background-color: #1e293b;
+            display: flex;
+            padding: 5px 10px 0 10px;
+            gap: 4px;
+        }
+
+        .aba {
+            padding: 10px 20px;
+            color: #94a3b8;
+            background-color: #334155;
+            font-size: 13px;
+            font-weight: bold;
+            border: none;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .aba.ativa {
+            background-color: #f4f6f9;
+            color: #1e293b;
+        }
+
+        .aba:hover:not(.ativa) {
+            background-color: #475569;
+            color: #fff;
+        }
+
+        /* 2. BARRA DE FERRAMENTAS */
+        .barra-ferramentas {
+            background-color: #ffffff;
+            display: flex;
+            gap: 15px;
+            padding: 12px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .btn-ferramenta {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            width: 85px;
+            padding: 8px;
+            border-radius: 10px;
+            transition: background 0.2s;
+        }
+
+        .btn-ferramenta:hover {
+            background-color: #f1f5f9;
+        }
+
+        .btn-ferramenta .icone {
+            font-size: 22px;
+            margin-bottom: 4px;
+        }
+
+        .btn-ferramenta .texto {
+            font-size: 11px;
+            font-weight: 700;
+            color: #475569;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .btn-ferramenta.sair .texto {
+            color: #ef4444;
+        }
+
+        /* 3. BARRA DE STATUS */
+        .barra-status {
+            background-color: #2c5ca4;
+            color: #ffffff;
+            text-align: center;
+            padding: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+
+        /* 4. CONTEÚDO PRINCIPAL (GRID DE MESAS) */
+        .container-principal {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+        }
+
+        .grid-mesas {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 12px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .card-mesa {
+            background-color: #10b981; /* Verde moderno */
+            color: white;
+            border: none;
+            border-radius: 12px; /* Geometria arredondada */
+            padding: 20px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card-mesa:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-mesa.ocupada {
+            background-color: #f43f5e; /* Vermelho moderno */
+        }
+
+        .card-mesa .num-mesa {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .card-mesa .status-mesa {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        /* RESPONSIVIDADE SIMPLES */
+        @media (max-width: 1024px) {
+            .grid-mesas {
+                grid-template-columns: repeat(6, 1fr);
+            }
+        }
+        @media (max-width: 768px) {
+            .grid-mesas {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="abas-container">
+        <button class="aba ativa">1 - VENDAS</button>
+        <button class="aba">2 - ESTOQUE</button>
+        <button class="aba">3 - CAIXA</button>
+        <button class="aba">4 - FINANCEIRO</button>
+        <button class="aba">5 - RELATÓRIOS</button>
+        <button class="aba">6 - CONFIGURAÇÃO DO SISTEMA</button>
+    </div>
+
+    <div class="barra-ferramentas">
+        <button class="btn-ferramenta">
+            <span class="icone">🪑</span>
+            <span class="texto">Mesas</span>
+        </button>
+        <button class="btn-ferramenta">
+            <span class="icone">🌳</span>
+            <span class="texto">Praça</span>
+        </button>
+        <button class="btn-ferramenta">
+            <span class="icone">📑</span>
+            <span class="texto">Comandas</span>
+        </button>
+        <button class="btn-ferramenta">
+            <span class="icone">🍺</span>
+            <span class="texto">Balcão</span>
+        </button>
+        <button class="btn-ferramenta">
+            <span class="icone">🖨️</span>
+            <span class="texto">Cupom</span>
+        </button>
+        <button class="btn-ferramenta">
+            <span class="icone">📋</span>
+            <span class="texto">Delivery</span>
+        </button>
+        <button class="btn-ferramenta sair">
+            <span class="icone">❌</span>
+            <span class="texto">Sair</span>
+        </button>
+    </div>
+
+    <div class="barra-status">
+        MAPA DE ATENDIMENTO DO SALÃO - 40 MESAS
+    </div>
+
+    <div class="container-principal">
+        <div class="grid-mesas">
+            <div class="card-mesa"><span class="num-mesa">Mesa 1</span><span class="status-mesa">Disponível</span></div>
+            <div class="card-mesa"><span class="num-mesa">Mesa 2</span><span class="status-mesa">Disponível</span></div>
+            <div class="card-mesa ocupada"><span class="num-mesa">Mesa 3</span><span class="status-mesa">Ocupada</span></div>
+            <div class="card-mesa"><span class="num-mesa">Mesa 4</span><span class="status-mesa">Disponível</span></div>
+            <div class="card-mesa"><span class="num-mesa">Mesa 5</span><span class="status-mesa">Disponível</span></div>
+            <div class="card-mesa ocupada"><span class="num-mesa">Mesa 6</span><span class="status-mesa">Ocupada</span></div>
+            <div class="card-mesa"><span class="num-mesa">Mesa 7</span><span class="status-mesa">Disponível</span></div>
+            <div class="card-mesa"><span class="num-mesa">Mesa 8</span><span class="status-mesa">Disponível</span></div>
+            <div class="card-mesa"><span class="num-mesa">Mesa 9</span><span class="status-mesa">Disponível</span></div>
+            <div class="card-mesa"><span class="num-mesa">Mesa 10</span><span class="status-mesa">Disponível</span></div>
+            <div class="card-mesa"><span class="num-mesa">Mesa 11</span><span class="status-mesa">Disponível</span></div>
+            <div class="card-mesa"><span class="num-mesa">Mesa 12</span><span class="status-mesa">Disponível</span></div>
+            <div class="card-mesa ocupada"><span class="num-mesa">Mesa 13</span><span class="status-mesa">Ocupada</span></div>
+            <div class="card-mesa"><span class="num-mesa">Mesa 14</span><span class="status-mesa">Disponível</span></div>
+            <div class="card-mesa"><span class="num-mesa">Mesa 15</span><span class="status-mesa">Disponível</span></div>
+            <div class="card-mesa"><span class="num-mesa">Mesa 16</span><span class="status-mesa">Disponível</span></div>
+            <div class="card-mesa"><span class="num-mesa">Mesa 17</span><span class="status-mesa">Disponível</span></div>
+            <div class="card-mesa"><span class="num-mesa">Mesa 18</span><span class="status-mesa">Disponível</span></div>
+            <div class="card-mesa"><span class="num-mesa">Mesa 19</span><span class="status-mesa">Disponível</span></div>
+            <div class="card-mesa"><span class="num-mesa">Mesa 20</span><span class="status-mesa">Disponível</span></div>
+            <div class="card-mesa"><span class="num-mesa">Mesa 21</span><span class="status-mesa">Disponível</span></div>
+            <div class="card-mesa"><span class="num-mesa">Mesa 22</span><span class="status-mesa">Disponível</span></div>
+            <div class="card-mesa"><span class="num-mesa">Mesa 23</span><span class="status-mesa">Disponível</span></div>
+            <div class="card-mesa ocupada"><span class="num-mesa">Mesa 24</span><span class="status-mesa">Ocupada</span></div>
+            <div class="card-mesa"><span class="num-mesa">Mesa 25</span><span class="status-mesa">Disponível</span></div>
+            <div class="card-mesa"><span class="num-mesa">Mesa 26</span><span class="status-mesa">Disponível</span></div>
+            <div class="card-mesa"><span class="num-mesa">Mesa 27</span><span class="status-mesa">Disponível</span></div>
+            <div class="card-mesa"><span class="num-mesa">Mesa 28</span><span class="status-mesa">Disponível</span></div>
+            <div class="card-mesa"><span class="num-mesa">Mesa 29</span><span class="status-mesa">Disponível</span></div>
+            <div class="card-mesa"><span class="num-mesa">Mesa 30</span><span class="status-mesa">Disponível</span></div>
+            <div class="card-mesa"><span class="num-mesa">Mesa 31</span><span class="status-mesa">Disponível</span></div>
+            <div class="card-mesa"><span class="num-mesa">Mesa 32</span><span class="status-mesa">Disponível</span></div>
+            <div class="card-mesa"><span class="num-mesa">Mesa 33</span><span class="status-mesa">Disponível</span></div>
+            <div class="card-mesa"><span class="num-mesa">Mesa 34</span><span class="status-mesa">Disponível</span></div>
+            <div class="card-mesa"><span class="num-mesa">Mesa 35</span><span class="status-mesa">Disponível</span></div>
+            <div class="card-mesa"><span class="num-mesa">Mesa 36</span><span class="status-mesa">Disponível</span></div>
+            <div class="card-mesa ocupada"><span class="num-mesa">Mesa 37</span><span class="status-mesa">Ocupada</span></div>
+            <div class="card-mesa"><span class="num-mesa">Mesa 38</span><span class="status-mesa">Disponível</span></div>
+            <div class="card-mesa"><span class="num-mesa">Mesa 39</span><span class="status-mesa">Disponível</span></div>
+            <div class="card-mesa"><span class="num-mesa">Mesa 40</span><span class="status-mesa">Disponível</span></div>
+        </div>
+    </div>
+
+</body>
+</html>
