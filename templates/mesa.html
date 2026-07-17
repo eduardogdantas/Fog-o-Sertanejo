@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalhes da Mesa</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { background-color: #f4f6f9; color: #333; padding: 40px; display: flex; justify-content: center; }
+        .painel { background-color: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 500px; text-align: center; }
+        h1 { color: #1e293b; margin-bottom: 10px; }
+        .status { font-size: 18px; font-weight: bold; margin-bottom: 30px; padding: 5px 15px; border-radius: 20px; display: inline-block; }
+        .status.disponivel { background-color: #d1fae5; color: #065f46; }
+        .status.ocupada { background-color: #ffe4e6; color: #9f1239; }
+        .botoes { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
+        .btn { padding: 12px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; text-decoration: none; color: white; transition: 0.2s; }
+        .btn-abrir { background-color: #f43f5e; }
+        .btn-fechar { background-color: #10b981; }
+        .btn-voltar { background-color: #64748b; }
+        .btn-pedido { background-color: #3b82f6; width: 100%; margin-top: 10px; padding: 12px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; }
+        .btn:hover { opacity: 0.8; }
+        .area-pedidos { margin-top: 30px; padding-top: 20px; border-top: 2px dashed #e2e8f0; text-align: left;}
+        .input-box { width: 100%; padding: 10px; margin-top: 5px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px; }
+        .lista-pedidos { list-style: none; margin-top: 20px; }
+        .lista-pedidos li { background-color: #f8fafc; padding: 10px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="painel">
+        <h1>Mesa {{ mesa[0] }}</h1>
+        
+        <div class="status {% if mesa[1] == 'Disponível' %}disponivel{% else %}ocupada{% endif %}">
+            Status: {{ mesa[1] }}
+        </div>
+
+        <div class="botoes">
+            {% if mesa[1] == 'Disponível' %}
+                <a href="{{ url_for('mudar_status', numero_mesa=mesa[0], novo_status='Ocupada') }}" class="btn btn-abrir">Ocupar Mesa</a>
+            {% else %}
+                <a href="{{ url_for('mudar_status', numero_mesa=mesa[0], novo_status='Disponível') }}" class="btn btn-fechar">Liberar Mesa</a>
+            {% endif %}
+            
+            <a href="{{ url_for('home') }}" class="btn btn-voltar">Voltar ao Mapa</a>
+        </div>
+
+        <div class="area-pedidos">
+            <h3 style="margin-bottom: 15px; color: #1e293b;">Lançar Pedido</h3>
+            
+            <!-- AQUI ESTÁ O FORMULÁRIO CORRETO -->
+            <form action="{{ url_for('adicionar_pedido', numero_mesa=mesa[0]) }}" method="POST">
+                <label>Produto:</label>
+                <input type="text" name="produto" class="input-box" placeholder="Ex: Baião de Dois" required>
+                
+                <label>Quantidade:</label>
+                <input type="number" name="quantidade" class="input-box" value="1" min="1" required>
+                
+                <button type="submit" class="btn-pedido">Adicionar Pedido</button>
+            </form>
+
+            <ul class="lista-pedidos">
+                {% for pedido in pedidos %}
+                    <li>
+                        <span>{{ pedido[0] }}</span> 
+                        <span>x{{ pedido[1] }}</span>
+                    </li>
+                {% else %}
+                    <p style="color: #64748b; margin-top: 15px; font-size: 14px; text-align: center;">Nenhum pedido anotado ainda.</p>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+</body>
+</html>
