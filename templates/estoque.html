@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Estoque - Sistema CUMMINS</title>
+    <style>
+        /* CSS Base do seu sistema */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { background-color: #f4f6f9; color: #333; height: 100vh; display: flex; flex-direction: column; }
+        
+        .abas-container { background-color: #1e293b; display: flex; padding: 5px 10px 0 10px; gap: 4px; }
+        .aba { padding: 10px 20px; color: #94a3b8; background-color: #334155; font-size: 13px; font-weight: bold; border: none; border-top-left-radius: 8px; border-top-right-radius: 8px; cursor: pointer; }
+        .aba.ativa { background-color: #f4f6f9; color: #1e293b; }
+        
+        .container-principal { padding: 25px; flex: 1; }
+        
+        /* Estilo da Tabela e Formulário */
+        .card-form { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        input { padding: 10px; border: 1px solid #ddd; border-radius: 8px; margin-right: 10px; }
+        button { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; color: white; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="abas-container">
+        <button class="aba" onclick="window.location.href='/'">1 - VENDAS</button>
+        <button class="aba ativa">2 - ESTOQUE</button>
+    </div>
+
+    <div class="container-principal">
+        <h2 style="margin-bottom: 20px; color: #1e293b;">Gestão de Estoque</h2>
+        
+        <!-- Formulário para Adicionar/Alterar/Remover -->
+        <div class="card-form">
+            <form method="POST">
+                <input type="text" name="nome" placeholder="Nome do Produto" required>
+                <input type="number" name="quantidade" placeholder="Qtd" required>
+                <input type="text" name="preco" placeholder="Preço (Ex: 10.50)" required>
+                
+                <button type="submit" name="acao" value="adicionar" style="background: #10b981;">Adicionar</button>
+                <button type="submit" name="acao" value="alterar" style="background: #3b82f6;">Atualizar</button>
+                <button type="submit" name="acao" value="remover" style="background: #f43f5e;">Remover</button>
+            </form>
+        </div>
+
+        <!-- Tabela de Produtos -->
+        <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden;">
+            <thead style="background: #1e293b; color: white;">
+                <tr>
+                    <th style="padding: 15px; text-align: left;">Produto</th>
+                    <th style="padding: 15px; text-align: center;">Quantidade</th>
+                    <th style="padding: 15px; text-align: right;">Preço</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in itens %}
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 15px;">{{ item[1] }}</td>
+                    <td style="padding: 15px; text-align: center;">{{ item[2] }}</td>
+                    <td style="padding: 15px; text-align: right;">R$ {{ "%.2f"|format(item[3]) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Caixa - Sistema CUMMINS</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { background-color: #f4f6f9; color: #333; height: 100vh; display: flex; flex-direction: column; }
+        
+        .abas-container { background-color: #1e293b; display: flex; padding: 5px 10px 0 10px; gap: 4px; }
+        .aba { padding: 10px 20px; color: #94a3b8; background-color: #334155; font-size: 13px; font-weight: bold; border: none; border-top-left-radius: 8px; border-top-right-radius: 8px; cursor: pointer; }
+        .aba.ativa { background-color: #f4f6f9; color: #1e293b; }
+        
+        .container-principal { padding: 25px; flex: 1; }
+        .card-form { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        input { padding: 10px; border: 1px solid #ddd; border-radius: 8px; margin-right: 10px; }
+        button { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; color: white; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="abas-container">
+        <a href="/" style="text-decoration: none;"><button class="aba">1 - VENDAS</button></a>
+        <a href="/estoque" style="text-decoration: none;"><button class="aba">2 - ESTOQUE</button></a>
+        <a href="/caixa" style="text-decoration: none;"><button class="aba ativa">3 - CAIXA</button></a>
+    </div>
+    <!-- ... (mesmo cabeçalho e menu das outras páginas) ... -->
+<div class="container-principal">
+    <h2>Relatório de Vendas do Dia</h2>
+    <table style="width: 100%; background: white; border-radius: 12px; margin-top: 20px;">
+        <thead>
+            <tr style="background: #1e293b; color: white;">
+                <th style="padding: 15px;">Item</th>
+                <th style="padding: 15px;">Qtd</th>
+                <th style="padding: 15px;">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for v in vendas %}
+            <tr>
+                <td style="padding: 15px;">{{ v[0] }}</td>
+                <td style="padding: 15px;">{{ v[1] }}</td>
+                <td style="padding: 15px;">R$ {{ "%.2f"|format(v[2]) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <h3 style="margin-top: 20px;">Total Vendido: R$ {{ "%.2f"|format(total) }}</h3>
+</div>
+</body>
+</html>

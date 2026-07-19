@@ -2,8 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema CUMMINS - Atendimento</title>
+    <title>Estoque - Sistema CUMMINS</title>
     <style>
         * {
             margin: 0;
@@ -179,94 +178,42 @@
         <a href="/caixa" style="text-decoration: none;"><button class="aba">3 - CAIXA</button></a>
     </div>
 
-    <div class="barra-ferramentas">
-        <button class="btn-ferramenta" onclick="mostrarView('mesas')">
-            <span class="icone">🪑</span>
-            <span class="texto">Mesas</span>
-        </button>
-        <button class="btn-ferramenta" onclick="mostrarView('pracas')">
-            <span class="icone">🌳</span>
-            <span class="texto">Praça</span>
-        </button>
-        <button class="btn-ferramenta">
-            <span class="icone">📑</span>
-            <span class="texto">Comandas</span>
-        </button>
-        <button class="btn-ferramenta">
-            <span class="icone">🍺</span>
-            <span class="texto">Balcão</span>
-        </button>
-        <button class="btn-ferramenta">
-            <span class="icone">🖨️</span>
-            <span class="texto">Cupom</span>
-        </button>
-        <button class="btn-ferramenta">
-            <span class="icone">📋</span>
-            <span class="texto">Delivery</span>
-        </button>
-        <button class="btn-ferramenta sair">
-            <span class="icone">❌</span>
-            <span class="texto">Sair</span>
-        </button>
-    </div>
-
-    <!-- ... (resto do seu código anterior) -->
-
-    <div class="barra-status">
-        MAPA DE ATENDIMENTO DO SALÃO - 40 MESAS
-    </div>
-
-<!-- Container Principal que controla o espaço restante -->
     <div class="container-principal">
-    <div style="padding: 20px; text-align: center;">
-</div>
-
-<!-- Container Mesas (Oculto por padrão) -->
-    <div id="view-mesas">
-    <div class="grid-mesas">
-        {% for mesa in mesas %}
-            <a href="{{ url_for('ver_mesa', numero_mesa=mesa[0]) }}" style="text-decoration: none;">
-                <div class="card-mesa {% if mesa[1]|lower == 'ocupada' %}ocupada{% endif %}">
-                    <span class="num-mesa">Mesa {{ mesa[0] }}</span>
-                </div>
-            </a>
-        {% endfor %}
-    </div>
-</div>
-
-<!-- Container PRAÇAS -->
-<div id="view-pracas" style="display: none;">
-    {% for praca_id, mesas_da_praca in por_praca.items() %}
-        <h3 style="margin: 20px;">Praça {{ praca_id }}</h3>
-        <div class="grid-mesas">
-            {% for mesa in mesas_da_praca %}
-                <a href="{{ url_for('ver_mesa', numero_mesa=mesa[0]) }}" style="text-decoration: none;">
-                    <div class="card-mesa {% if mesa[1]|lower == 'ocupada' %}ocupada{% endif %}">
-                        <span class="num-mesa">Mesa {{ mesa[0] }}</span>
-                    </div>
-                </a>
-            {% endfor %}
+        <h2 style="margin-bottom: 20px; color: #1e293b;">Gestão de Estoque</h2>
+        
+        <!-- Formulário para Adicionar/Alterar/Remover -->
+        <div class="card-form">
+            <form method="POST">
+                <input type="text" name="nome" placeholder="Nome do Produto" required>
+                <input type="number" name="quantidade" placeholder="Qtd" required>
+                <input type="text" name="preco" placeholder="Preço (Ex: 10.50)" required>
+                
+                <button type="submit" name="acao" value="adicionar" style="background: #10b981;">Adicionar</button>
+                <button type="submit" name="acao" value="alterar" style="background: #3b82f6;">Atualizar</button>
+                <button type="submit" name="acao" value="remover" style="background: #f43f5e;">Remover</button>
+            </form>
         </div>
-    {% endfor %}
-</div>
-<script>
-    function mostrarView(tipo) {
-        const viewMesas = document.getElementById('view-mesas');
-        const viewPracas = document.getElementById('view-pracas');
 
-        if (!viewMesas || !viewPracas) {
-            console.error("ERRO: Elementos não encontrados no HTML!");
-            return;
-        }
+        <!-- Tabela de Produtos -->
+        <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden;">
+            <thead style="background: #1e293b; color: white;">
+                <tr>
+                    <th style="padding: 15px; text-align: left;">Produto</th>
+                    <th style="padding: 15px; text-align: center;">Quantidade</th>
+                    <th style="padding: 15px; text-align: right;">Preço</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in itens %}
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 15px;">{{ item[1] }}</td>
+                    <td style="padding: 15px; text-align: center;">{{ item[2] }}</td>
+                    <td style="padding: 15px; text-align: right;">R$ {{ "%.2f"|format(item[3]) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
-        if (tipo === 'mesas') {
-            viewMesas.style.display = 'block';
-            viewPracas.style.display = 'none';
-        } else if (tipo === 'pracas') {
-            viewMesas.style.display = 'none';
-            viewPracas.style.display = 'block';
-        }
-    }
-</script>
 </body>
 </html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Caixa - Sistema CUMMINS</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { background-color: #f4f6f9; color: #333; height: 100vh; display: flex; flex-direction: column; }
+        
+        .abas-container { background-color: #1e293b; display: flex; padding: 5px 10px 0 10px; gap: 4px; }
+        .aba { padding: 10px 20px; color: #94a3b8; background-color: #334155; font-size: 13px; font-weight: bold; border: none; border-top-left-radius: 8px; border-top-right-radius: 8px; cursor: pointer; }
+        .aba.ativa { background-color: #f4f6f9; color: #1e293b; }
+        
+        .container-principal { padding: 25px; flex: 1; }
+        .card-form { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        input { padding: 10px; border: 1px solid #ddd; border-radius: 8px; margin-right: 10px; }
+        button { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; color: white; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="abas-container">
+        <a href="/" style="text-decoration: none;"><button class="aba">1 - VENDAS</button></a>
+        <a href="/estoque" style="text-decoration: none;"><button class="aba">2 - ESTOQUE</button></a>
+        <a href="/caixa" style="text-decoration: none;"><button class="aba ativa">3 - CAIXA</button></a>
+    </div>
+
+    <div class="container-principal">
+        <h2 style="margin-bottom: 20px; color: #1e293b;">Gestão de Caixa</h2>
+        
+        <div class="card-form">
+            <form method="POST">
+                <input type="text" name="valor" placeholder="Valor R$" required>
+                <button type="submit" name="acao" value="abrir" style="background: #10b981;">Abrir Caixa</button>
+                <button type="submit" name="acao" value="fechar" style="background: #f43f5e;">Fechar Caixa</button>
+            </form>
+        </div>
+
+        <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <thead style="background: #1e293b; color: white;">
+                <tr>
+                    <th style="padding: 15px; text-align: left;">ID</th>
+                    <th style="padding: 15px; text-align: center;">Status</th>
+                    <th style="padding: 15px; text-align: right;">Valor Inicial</th>
+                    <th style="padding: 15px; text-align: right;">Valor Final</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in registros %}
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 15px;">{{ r[0] }}</td>
+                    <td style="padding: 15px; text-align: center;">{{ r[1] }}</td>
+                    <td style="padding: 15px; text-align: right;">R$ {{ "%.2f"|format(r[2] or 0) }}</td>
+                    <td style="padding: 15px; text-align: right;">R$ {{ "%.2f"|format(r[3] or 0) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

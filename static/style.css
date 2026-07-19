@@ -105,16 +105,17 @@ body {
 
 /* 4. CONTEÚDO PRINCIPAL (GRID DE MESAS) */
 .container-principal {
-    display: flex;
-    justify-content: center; /* Centraliza horizontalmente */
+    flex: 1;
+    padding: 25px;
+    overflow-y: auto;
     width: 100%;
 }
 
 .grid-mesas {
     display: grid;
-    grid-template-columns: repeat(8, 120px); 
+    grid-template-columns: repeat(8, 1fr);
     gap: 15px;
-    margin: 0 auto; /* Centraliza o grid */
+    width: 100%;
 }
 
 .card-mesa {
@@ -185,3 +186,29 @@ body {
     background-color: #f8d7da; /* Fundo vermelho claro */
     border: 1px solid #f5c6cb;
 }
+#view-mesas, #view-pracas {
+    width: 100%;
+    margin-top: 20px;
+}
+#view-mesas {
+    display: none; /* O padrão é none */
+    width: 100%;
+    margin-top: 20px;
+    background-color: #f4f6f9; /* Mesma cor do corpo para não criar caixa estranha */
+}
+#view-mesas {
+    display: block; /* Estado inicial: visível */
+}
+
+#view-pracas {
+    display: none; /* Estado inicial: escondido */
+}
+
+/* Garante que o grid sempre tenha espaço */
+.grid-mesas {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 12px;
+}
+#view-mesas { display: block !important; }
+#view-pracas { display: none !important; }
