@@ -35,11 +35,14 @@
     </style>
 </head>
 <body>
-    <div class="abas-container">
-        <a href="/" class="aba ativa">1 - VENDAS</a>
-        <a href="/estoque" class="aba">2 - ESTOQUE</a>
-        <a href="/caixa" class="aba">3 - CAIXA</a>
-    </div>
+<div class="abas-container">
+    <a href="/" class="aba {% if request.path == '/' %}ativa{% endif %}">1 - VENDAS</a>
+    <a href="/estoque" class="aba {% if request.path == '/estoque' %}ativa{% endif %}">2 - ESTOQUE</a>
+    <a href="/caixa" class="aba {% if request.path == '/caixa' %}ativa{% endif %}">3 - CAIXA</a>
+    <a href="/financeiro" class="aba {% if request.path == '/financeiro' %}ativa{% endif %}">4 - FINANCEIRO</a>
+    <a href="/relatorio" class="aba {% if request.path == '/relatorio' %}ativa{% endif %}">5 - RELATÓRIOS</a>
+    <a href="/configuracao" class="aba {% if request.path == '/configuracao' %}ativa{% endif %}">6 - CONFIGURAÇÃO</a>
+</div>
 
     <div class="wrapper">
         <div class="painel">
@@ -53,7 +56,7 @@
             {% if mesa[1]|trim|lower == 'disponível' %}
                 <a href="{{ url_for('mudar_status', numero_mesa=mesa[0], novo_status='Ocupada') }}" class="btn btn-abrir">Ocupar Mesa</a>
             {% else %}
-                <a href="{{ url_for('mudar_status', numero_mesa=mesa[0], novo_status='Disponível') }}" class="btn btn-fechar">Liberar Mesa</a>
+                <a href="{{ url_for('liberar_mesa', numero_mesa=mesa[0]) }}" class="btn btn-fechar">Liberar Mesa</a>
             {% endif %}
             
             <a href="{{ url_for('home') }}" class="btn btn-voltar">Voltar ao Mapa</a>

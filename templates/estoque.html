@@ -2,37 +2,43 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Estoque - Sistema CUMMINS</title>
+    <title>Estoque - Sistema</title>
     <style>
-        /* CSS Base do seu sistema */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
-        body { background-color: #f4f6f9; color: #333; height: 100vh; display: flex; flex-direction: column; }
+        body { background-color: #f4f6f9; color: #333; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
         .abas-container { background-color: #1e293b; display: flex; padding: 5px 10px 0 10px; gap: 4px; }
-        .aba { padding: 10px 20px; color: #94a3b8; background-color: #334155; font-size: 13px; font-weight: bold; border: none; border-top-left-radius: 8px; border-top-right-radius: 8px; cursor: pointer; }
+        .aba { padding: 10px 20px; color: #94a3b8; background-color: #334155; font-size: 13px; font-weight: bold; border: none; border-top-left-radius: 8px; border-top-right-radius: 8px; cursor: pointer; transition: all 0.2s ease; text-decoration: none; display: inline-block; }
         .aba.ativa { background-color: #f4f6f9; color: #1e293b; }
-        
-        .container-principal { padding: 25px; flex: 1; }
-        
-        /* Estilo da Tabela e Formulário */
-        .card-form { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        input { padding: 10px; border: 1px solid #ddd; border-radius: 8px; margin-right: 10px; }
-        button { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; color: white; font-weight: bold; }
+        .aba:hover:not(.ativa) { background-color: #475569; color: #fff; }
+
+        .container-principal { flex: 1; padding: 25px; overflow-y: auto; width: 100%; }
+        .card-form { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 25px; }
+        .form-estoque { display: flex; gap: 10px; align-items: center; }
+        .form-estoque input { padding: 10px; border: 1px solid #ddd; border-radius: 6px; flex: 1; }
+        .form-estoque button { padding: 10px 20px; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        th, td { padding: 15px; border-bottom: 1px solid #f1f5f9; }
+        th { background: #1e293b; color: white; text-align: left; }
     </style>
 </head>
 <body>
 
     <div class="abas-container">
-        <button class="aba" onclick="window.location.href='/'">1 - VENDAS</button>
-        <button class="aba ativa">2 - ESTOQUE</button>
+        <a href="/" style="text-decoration: none;"><button class="aba">1 - VENDAS</button></a>
+        <a href="/estoque" style="text-decoration: none;"><button class="aba ativa">2 - ESTOQUE</button></a>
+        <a href="/caixa" style="text-decoration: none;"><button class="aba">3 - CAIXA</button></a>
+        <a href="/financeiro" style="text-decoration: none;"><button class="aba">4 - FINANCEIRO</button></a>
+        <a href="/relatorios" style="text-decoration: none;"><button class="aba">5 - RELATÓRIOS</button></a>
+        <a href="/configuracao" style="text-decoration: none;"><button class="aba">6 - CONFIGURAÇÃO DO SISTEMA</button></a>
     </div>
 
     <div class="container-principal">
         <h2 style="margin-bottom: 20px; color: #1e293b;">Gestão de Estoque</h2>
         
-        <!-- Formulário para Adicionar/Alterar/Remover -->
         <div class="card-form">
-            <form method="POST">
+            <form method="POST" class="form-estoque">
                 <input type="text" name="nome" placeholder="Nome do Produto" required>
                 <input type="number" name="quantidade" placeholder="Qtd" required>
                 <input type="text" name="preco" placeholder="Preço (Ex: 10.50)" required>
@@ -43,21 +49,20 @@
             </form>
         </div>
 
-        <!-- Tabela de Produtos -->
-        <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden;">
-            <thead style="background: #1e293b; color: white;">
+        <table>
+            <thead>
                 <tr>
-                    <th style="padding: 15px; text-align: left;">Produto</th>
-                    <th style="padding: 15px; text-align: center;">Quantidade</th>
-                    <th style="padding: 15px; text-align: right;">Preço</th>
+                    <th>Produto</th>
+                    <th style="text-align: center;">Quantidade</th>
+                    <th style="text-align: right;">Preço</th>
                 </tr>
             </thead>
             <tbody>
                 {% for item in itens %}
-                <tr style="border-bottom: 1px solid #f1f5f9;">
-                    <td style="padding: 15px;">{{ item[1] }}</td>
-                    <td style="padding: 15px; text-align: center;">{{ item[2] }}</td>
-                    <td style="padding: 15px; text-align: right;">R$ {{ "%.2f"|format(item[3]) }}</td>
+                <tr>
+                    <td>{{ item[1] }}</td>
+                    <td style="text-align: center;">{{ item[2] }}</td>
+                    <td style="text-align: right;">R$ {{ "%.2f"|format(item[3]) }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

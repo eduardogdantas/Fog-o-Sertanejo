@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Financeiro</title>
+    <style>
+        /* Mantenha o seu CSS atual e adicione estes ajustes para o Financeiro */
+        .container-financeiro { padding: 25px; }
+        
+        .header-financeiro {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .form-inline { display: flex; gap: 10px; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; }
+        th, td { padding: 12px; border: 1px solid #e2e8f0; text-align: left; }
+        th { background-color: #f8fafc; }
+    </style>
+</head>
+<body>
+    <!-- Menu Superior -->
+    <div class="abas-container">
+        <a href="/"><button class="aba">1 - VENDAS</button></a>
+        <a href="/estoque"><button class="aba">2 - ESTOQUE</button></a>
+        <a href="/caixa"><button class="aba">3 - CAIXA</button></a>
+        <a href="/financeiro"><button class="aba ativa">4 - FINANCEIRO</button></a>
+        <a href="/relatorios"><button class="aba">5 - RELATÓRIOS</button></a>
+        <a href="/configuração"><button class="aba">6 - CONFIGURAÇÃO DO SISTEMA</button></a>
+    </div>
+
+   
+<div class="container-principal">
+    <h1 style="margin-bottom: 20px; color: #1e293b;">Controle Financeiro</h1>
+
+    <!-- Card Branco com Formulário de Lançamento e Botão Limpar -->
+    <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+        
+        <!-- Formulário de Lançamento -->
+        <form action="/adicionar_financa" method="POST" style="display: flex; gap: 10px; align-items: center; flex: 1;">
+            <input type="text" name="descricao" placeholder="Descrição" style="padding: 10px; border: 1px solid #ddd; border-radius: 6px; width: 250px;" required>
+            <input type="number" step="0.01" name="valor" placeholder="Valor R$" style="padding: 10px; border: 1px solid #ddd; border-radius: 6px; width: 150px;" required>
+            <select name="tipo" style="padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                <option value="Despesa">Despesa</option>
+                <option value="Receita">Receita</option>
+            </select>
+            <button type="submit" style="padding: 10px 20px; background-color: #10b981; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">Lançar</button>
+        </form>
+
+        <!-- Botão para Limpar Toda a Lista -->
+        <form action="/limpar_financas" method="POST" onsubmit="return confirm('Tem certeza que deseja apagar todo o histórico financeiro?');" style="margin-left: 15px;">
+            <button type="submit" style="padding: 10px 20px; background-color: #f43f5e; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">Limpar Lista</button>
+        </form>
+    </div>
+
+    <!-- Tabela com Cabeçalho Escuro -->
+    <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+<thead style="background-color: #1e293b;">
+    <tr>
+        <th style="padding: 15px; text-align: left; color: #334155; font-weight: bold;">Data/hora</th>
+        <th style="padding: 15px; text-align: left; color: #334155; font-weight: bold;">Descrição</th>
+        <th style="padding: 15px; text-align: left; color: #334155; font-weight: bold;">Tipo</th>
+        <th style="padding: 15px; text-align: left; color: #334155; font-weight: bold;">Valor</th>
+    </tr>
+</thead>
+        <tbody>
+            {% for mov in movimentacoes %}
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 15px;">{{ mov[4] if mov[4] else '-' }}</td>
+                <td style="padding: 15px;">{{ mov[1] }}</td>
+                <td style="padding: 15px;" class="{{ 'texto-vermelho' if mov[3] == 'Despesa' else 'texto-verde' }}">{{ mov[3] }}</td>
+                <td style="padding: 15px; font-weight: bold;">R$ {{ "%.2f"|format(mov[2]) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr style="background-color: #f8fafc; font-weight: bold; border-top: 2px solid #cbd5e1;">
+                <td colspan="3" style="padding: 15px; text-align: right;">TOTAL VENDIDO (RECEITAS):</td>
+                <td style="padding: 15px; color: #10b981; font-size: 16px;">R$ {{ "%.2f"|format(total_vendido) }}</td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+</body>
+</html>

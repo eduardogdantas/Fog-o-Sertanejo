@@ -212,3 +212,53 @@ body {
 }
 #view-mesas { display: block !important; }
 #view-pracas { display: none !important; }
+/* Espaçamento geral */
+.container-financeiro {
+    padding: 20px;
+    margin-top: 20px;
+}
+
+/* Formulário alinhado */
+.form-inline {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+    align-items: center;
+}
+
+/* Estilização da Tabela */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+}
+
+th, td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+
+th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+}
+
+/* Efeito ao passar o mouse na linha */
+tr:hover {
+    background-color: #f9f9f9;
+}
+.aba {
+    padding: 10px 20px;
+    color: #94a3b8;
+    background-color: #334155;
+    font-size: 13px;
+    font-weight: bold;
+    border: none;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none; /* Remove o sublinhado do link */
+    display: inline-block; /* Força o link a se comportar como bloco */
+}

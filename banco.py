@@ -8,10 +8,10 @@ def iniciar_banco():
 
     # 1. Cria a tabela de mesas
     cursor.execute('''CREATE TABLE IF NOT EXISTS mesas (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT, 
-                        numero INTEGER, 
-                        status TEXT, 
-                        praca_id INTEGER)''')
+                            id INTEGER PRIMARY KEY AUTOINCREMENT, 
+                            numero INTEGER, 
+                            status TEXT, 
+                            praca_id INTEGER)''')
     
     # 2. Verifica se a tabela está vazia. Se estiver, cria as 40 mesas
     cursor.execute('SELECT COUNT(*) FROM mesas')
@@ -24,19 +24,27 @@ def iniciar_banco():
     # 3. Garante a tabela pedidos com a coluna preco
     cursor.execute('DROP TABLE IF EXISTS pedidos')
     cursor.execute('''CREATE TABLE pedidos (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        mesa_numero INTEGER NOT NULL,
-                        produto TEXT NOT NULL,
-                        quantidade INTEGER NOT NULL,
-                        preco REAL DEFAULT 0)''')
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            mesa_numero INTEGER NOT NULL,
+                            produto TEXT NOT NULL,
+                            quantidade INTEGER NOT NULL,
+                            preco REAL DEFAULT 0)''')
     
     # 4. Cria as outras tabelas necessárias
     cursor.execute('CREATE TABLE IF NOT EXISTS estoque (id INTEGER PRIMARY KEY, nome TEXT, quantidade INTEGER, preco REAL)')
     cursor.execute('CREATE TABLE IF NOT EXISTS caixa (id INTEGER PRIMARY KEY, status TEXT, valor_inicial REAL, valor_final REAL, data TIMESTAMP DEFAULT CURRENT_TIMESTAMP)')
 
+    # 5. Adiciona a tabela de finanças
+    cursor.execute('''CREATE TABLE IF NOT EXISTS financas (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        descricao TEXT NOT NULL,
+                        valor REAL NOT NULL,
+                        tipo TEXT NOT NULL,
+                        data TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
+
     conexao.commit()
     conexao.close()
-    print("Banco de dados configurado e mesas restauradas!")
+    print("Banco de dados configurado e tabelas atualizadas!")
 
     
 def criar_tabela_estoque():
