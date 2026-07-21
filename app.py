@@ -1,5 +1,5 @@
 from datetime import datetime
-from flask import Flask, redirect, render_template, request, url_for
+from flask import Flask, redirect, render_template, request, url_for, jsonify
 import sqlite3
 
 app = Flask(__name__)
@@ -113,44 +113,65 @@ def adicionar_pedido(numero_mesa):
 
 @app.route("/estoque", methods=["GET", "POST"])
 def gerenciar_estoque():
-  conexao = sqlite3.connect("restaurante.db")
-  cursor = conexao.cursor()
+    conexao = sqlite3.connect("restaurante.db")
+    cursor = conexao.cursor()
 
-  # Garante que a tabela exista antes de qualquer operação
-  cursor.execute("""CREATE TABLE IF NOT EXISTS estoque (
+    # Garante que a tabela exista antes de qualquer operação
+    cursor.execute("""CREATE TABLE IF NOT EXISTS estoque (
                 id INTEGER PRIMARY KEY AUTOINCREMENT, 
                 nome TEXT NOT NULL, 
                 quantidade INTEGER NOT NULL, 
                 preco REAL NOT NULL)""")
 
-  if request.method == "POST":
-    acao = request.form.get("acao")
-    nome = request.form.get("nome")
-    qtd = int(request.form.get("quantidade") or 0)
-    preco_input = request.form.get("preco", "0")
-    preco = float(preco_input.replace(",", "."))
+    if request.method == "POST":
+        acao = request.form.get("acao")
+        # Se for adicionar, o campo 'nome' é texto. Se for alterar/remover, o select envia o ID.
+        identificador = request.form.get("nome") 
+        
+        qtd_raw = request.form.get("quantidade", "0")
+        try:
+            qtd = float(qtd_raw)
+        except ValueError:
+            qtd = 0.0
 
-    try:
-      if acao == "adicionar":
-        cursor.execute(
-            "INSERT INTO estoque (nome, quantidade, preco) VALUES (?, ?, ?)",
-            (nome, qtd, preco),
-        )
-      elif acao == "remover":
-        cursor.execute("DELETE FROM estoque WHERE nome = ?", (nome,))
-      elif acao == "alterar":
-        cursor.execute(
-            "UPDATE estoque SET quantidade = ?, preco = ? WHERE nome = ?",
-            (qtd, preco, nome),
-        )
-      conexao.commit()
-    except Exception as e:
-      print(f"Erro no banco: {e}")
+        preco_input = request.form.get("preco", "0")
+        try:
+            preco = float(preco_input.replace(",", "."))
+        except ValueError:
+            preco = 0.0
 
-  cursor.execute("SELECT * FROM estoque")
-  itens = cursor.fetchall()
-  conexao.close()
-  return render_template("estoque.html", itens=itens)
+        try:
+            if acao == "adicionar":
+                nome_prod = request.form.get("nome_texto", "")
+                cursor.execute(
+                    "INSERT INTO estoque (nome, quantidade, preco) VALUES (?, ?, ?)",
+                    (nome_prod, int(qtd), preco),
+                )
+            elif acao == "remover":
+                cursor.execute("DELETE FROM estoque WHERE id = ?", (identificador,))
+            elif acao == "alterar":
+                nome_prod = request.form.get("nome_texto", "")
+                cursor.execute(
+                    "UPDATE estoque SET nome = ?, quantidade = ?, preco = ? WHERE id = ?",
+                    (nome_prod, int(qtd), preco, identificador),
+                )
+            elif acao == "reajustar":
+                valor_reajuste = request.form.get("valor_reajuste", "0")
+                try:
+                    percentual = float(valor_reajuste.replace(",", ".")) / 100.0
+                except ValueError:
+                    percentual = 0.0
+                
+                cursor.execute("UPDATE estoque SET preco = preco + (preco * ?)", (percentual,))
+                
+            conexao.commit()
+        except Exception as e:
+            print(f"Erro no banco: {e}")
+
+    cursor.execute("SELECT * FROM estoque")
+    itens = cursor.fetchall()
+    conexao.close()
+    return render_template("estoque.html", itens=itens)
 
 
 @app.route("/caixa", methods=["GET", "POST"])
@@ -346,6 +367,91 @@ def liberar_mesa(numero_mesa):
 
   return redirect(url_for("home"))
 
+@app.route('/api/gerar-relatorio', methods=['GET'])
+def api_gerar_relatorio():
+    tipo = request.args.get('tipo')
+    data_inicio = request.args.get('inicio')
+    data_fim = request.args.get('fim')
+    
+   
+    resultados = []
+    
+    if tipo == 'vendas':
+        # Exemplo de dados retornados para o relatório de vendas
+        resultados = [
+            {"id": 101, "descricao": "Venda de Produto A", "referencia": "Caixa 01", "valor": "R$ 150,00"},
+            {"id": 102, "descricao": "Venda de Produto B", "referencia": "Caixa 01", "valor": "R$ 80,00"}
+        ]
+    elif tipo == 'financeiro':
+        resultados = [
+            {"id": 201, "descricao": "Pagamento de Fornecedor", "referencia": "Despesa", "valor": "R$ 300,00"}
+        ]
+        
+    return jsonify(resultados)
+
+@app.route('/relatorio')
+def exibir_pagina_relatorio():
+    return render_template('relatorios.html')
+
+@app.route('/relatorios')
+def relatorios():
+    conexao = sqlite3.connect("restaurante.db")
+    cursor = conexao.cursor()
+    
+    # Busca todas as receitas registradas no financeiro
+    cursor.execute("SELECT id, descricao, tipo, valor FROM financeiro WHERE tipo = 'Receita' ORDER BY id DESC")
+    dados = cursor.fetchall()
+    
+    resultados = []
+    soma_total = 0.0
+    
+    for item in dados:
+        id_item, desc, tipo, val = item
+        soma_total += val
+        resultados.append({
+            "id": id_item,
+            "descricao": desc,
+            "referencia": "Mesa / Caixa",
+            "valor": f"R$ {val:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+        })
+        
+    total_pedidos = len(resultados)
+    ticket_medio = soma_total / total_pedidos if total_pedidos > 0 else 0
+
+    vendas_formatadas = f"R$ {soma_total:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+    ticket_formatado = f"R$ {ticket_medio:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+
+    conexao.close()
+
+    return render_template(
+        'relatorios.html',
+        vendas_totais=vendas_formatadas,
+        total_pessoas=total_pedidos,
+        total_pedidos=total_pedidos,
+        ticket_medio=ticket_formatado,
+        resultados=resultados
+    )
+
+@app.route('/vendas')
+def vendas():
+    conexao = conectar_db()
+    cursor = conexao.cursor()
+    
+    # 1. Busca todas as mesas
+    cursor.execute("SELECT numero, status, praca_id FROM mesas ORDER BY numero")
+    mesas = cursor.fetchall()
+    
+    # 2. Cria o dicionário das praças para a visualização por praça
+    por_praca = {}
+    for mesa in mesas:
+        praca = mesa[2]
+        if praca not in por_praca:
+            por_praca[praca] = []
+        por_praca[praca].append(mesa)
+        
+    conexao.close()
+
+    return render_template('vendas.html', mesas=mesas, por_praca=por_praca)
 
 if __name__ == "__main__":
-  app.run(debug=True)
+    app.run(debug=True)

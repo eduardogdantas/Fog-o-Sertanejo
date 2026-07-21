@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - Relatórios</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- 1. ABAS SUPERIORES -->
+    <div class="abas-container">
+        <a href="/vendas" style="text-decoration: none;"><button class="aba">1 - VENDAS</button></a>
+        <a href="/estoque" style="text-decoration: none;"><button class="aba">2 - ESTOQUE</button></a>
+        <a href="/caixa" style="text-decoration: none;"><button class="aba">3 - CAIXA</button></a>
+        <a href="/relatorios" style="text-decoration: none;"><button class="aba">4 - RELATÓRIOS</button></a>
+        <a href="/configuracao" style="text-decoration: none;"><button class="aba">5 - CONFIGURAÇÃO DO SISTEMA</button></a>
+    </div>
+
+    <!-- 2. CONTEÚDO PRINCIPAL -->
+    <div class="container-principal">
+        
+        <div class="dashboard-header">
+            <h2>Dashboard</h2>
+            <p>Acompanhe a evolução da sua empresa</p>
+        </div>
+
+        <div class="sub-abas">
+            <button class="sub-aba ativa"><i class="fa-regular fa-calendar"></i> Dados do mês</button>
+            <button class="sub-aba"><i class="fa-solid fa-bolt"></i> Em tempo real</button>
+        </div>
+
+        <div class="seletor-mes">
+            <span>julho 2026 - clique para alterar</span>
+        </div>
+
+        <!-- Cards Dinâmicos integrados com o Python -->
+        <div class="dashboard-cards">
+            <div class="card-metrica card-azul">
+                <i class="fa-solid fa-utensils icone-card"></i>
+                <span class="titulo-card">Vendas totais</span>
+                <span class="valor-card">{{ vendas_totais }}</span>
+            </div>
+
+            <div class="card-metrica card-amarelo">
+                <i class="fa-solid fa-users icone-card"></i>
+                <span class="titulo-card">Pessoas atendidas</span>
+                <span class="valor-card">{{ total_pessoas }}</span>
+                <span class="sub-valor">({{ total_pedidos }} pedidos)</span>
+            </div>
+
+            <div class="card-metrica card-roxo">
+                <i class="fa-solid fa-ticket icone-card"></i>
+                <span class="titulo-card">Ticket médio</span>
+                <span class="valor-card">{{ ticket_medio }}</span>
+            </div>
+        </div>
+
+        <!-- Filtro -->
+        <div class="barra-ferramentas" style="border-radius: 8px; margin-top: 25px; align-items: flex-end;">
+            <div style="display: flex; flex-direction: column; gap: 5px; flex: 1;">
+                <label style="font-size: 11px; font-weight: bold; color: #475569; text-transform: uppercase;">Tipo de Relatório</label>
+                <select id="filtro-tipo" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; outline: none;">
+                    <option value="vendas">Relatório de Vendas (Mesas)</option>
+                </select>
+            </div>
+            <button onclick="window.location.reload();" style="background-color: #10b981; color: white; border: none; padding: 11px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px;">
+                Filtrar Dados
+            </button>
+        </div>
+
+        <!-- Tabela preenchida automaticamente pelas vendas das mesas -->
+        <div style="background: white; border-radius: 8px; overflow: hidden; margin-top: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Descrição</th>
+                        <th>Referência</th>
+                        <th>Valor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if resultados %}
+                        {% for item in resultados %}
+                        <tr>
+                            <td>{{ item.id }}</td>
+                            <td>{{ item.descricao }}</td>
+                            <td>{{ item.referencia }}</td>
+                            <td>{{ item.valor }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="4" style="text-align: center; color: #64748b; padding: 25px;">Nenhuma venda registrada nas mesas ainda.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</body>
+</html>

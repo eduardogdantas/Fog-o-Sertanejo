@@ -2,72 +2,499 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Estoque - Sistema</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Estoque</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
-        body { background-color: #f4f6f9; color: #333; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        
-        .abas-container { background-color: #1e293b; display: flex; padding: 5px 10px 0 10px; gap: 4px; }
-        .aba { padding: 10px 20px; color: #94a3b8; background-color: #334155; font-size: 13px; font-weight: bold; border: none; border-top-left-radius: 8px; border-top-right-radius: 8px; cursor: pointer; transition: all 0.2s ease; text-decoration: none; display: inline-block; }
-        .aba.ativa { background-color: #f4f6f9; color: #1e293b; }
-        .aba:hover:not(.ativa) { background-color: #475569; color: #fff; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
 
-        .container-principal { flex: 1; padding: 25px; overflow-y: auto; width: 100%; }
-        .card-form { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 25px; }
-        .form-estoque { display: flex; gap: 10px; align-items: center; }
-        .form-estoque input { padding: 10px; border: 1px solid #ddd; border-radius: 6px; flex: 1; }
-        .form-estoque button { padding: 10px 20px; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        body {
+            background-color: #f4f6f9;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
 
-        table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        th, td { padding: 15px; border-bottom: 1px solid #f1f5f9; }
-        th { background: #1e293b; color: white; text-align: left; }
+        /* 1. ABAS SUPERIORES */
+        .abas-container {
+            background-color: #1e293b;
+            display: flex;
+            padding: 5px 10px 0 10px;
+            gap: 4px;
+        }
+
+        .aba {
+            padding: 10px 20px;
+            color: #94a3b8;
+            background-color: #334155;
+            font-size: 13px;
+            font-weight: bold;
+            border: none;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .aba.ativa {
+            background-color: #f4f6f9;
+            color: #1e293b;
+        }
+
+        .aba:hover:not(.ativa) {
+            background-color: #475569;
+            color: #fff;
+        }
+
+        /* 2. BARRA DE FERRAMENTAS */
+        .barra-ferramentas {
+            background-color: #ffffff;
+            display: flex;
+            gap: 15px;
+            padding: 12px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .btn-ferramenta {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            width: 95px;
+            padding: 8px;
+            border-radius: 10px;
+            transition: background 0.2s;
+        }
+
+        .btn-ferramenta:hover {
+            background-color: #f1f5f9;
+        }
+
+        .btn-ferramenta .icone {
+            font-size: 22px;
+            margin-bottom: 4px;
+        }
+
+        .btn-ferramenta .texto {
+            font-size: 11px;
+            font-weight: 700;
+            color: #475569;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        /* 3. BARRA DE STATUS */
+        .barra-status {
+            background-color: #2c5ca4;
+            color: #ffffff;
+            text-align: center;
+            padding: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+
+        /* 4. CONTEÚDO PRINCIPAL (Limpo) */
+        .container-principal {
+            flex: 1;
+            padding: 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #64748b;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        /* --- MODAL / POP-UP ESTILO MODERNO --- */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-card {
+            background: white;
+            width: 100%;
+            max-width: 650px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            overflow: hidden;
+            animation: fadeIn 0.2s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-header {
+            background-color: #1e293b;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 20px;
+            max-height: 350px;
+            overflow-y: auto;
+        }
+
+        /* Estilização elegante da barra de rolagem */
+        .modal-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .modal-body::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .tabela-estoque {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .tabela-estoque th {
+            background-color: #1e293b;
+            color: white;
+            padding: 12px 15px;
+            text-align: left;
+            font-size: 13px;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+
+        .tabela-estoque td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 14px;
+            color: #334155;
+        }
+
+        .tabela-estoque tr:hover td {
+            background-color: #f8fafc;
+            cursor: pointer;
+        }
+
+        .grupo-input {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .grupo-input label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 5px;
+        }
+
+        .grupo-input input, .grupo-input select {
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .modal-footer {
+            padding: 15px 20px;
+            background-color: #f8fafc;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .btn-modal {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+        }
+
+        .btn-salvar { background-color: #10b981; }
+        .btn-cancelar { background-color: #64748b; }
     </style>
 </head>
 <body>
 
+    <!-- 1. ABAS SUPERIORES -->
     <div class="abas-container">
-        <a href="/" style="text-decoration: none;"><button class="aba">1 - VENDAS</button></a>
-        <a href="/estoque" style="text-decoration: none;"><button class="aba ativa">2 - ESTOQUE</button></a>
-        <a href="/caixa" style="text-decoration: none;"><button class="aba">3 - CAIXA</button></a>
-        <a href="/financeiro" style="text-decoration: none;"><button class="aba">4 - FINANCEIRO</button></a>
-        <a href="/relatorios" style="text-decoration: none;"><button class="aba">5 - RELATÓRIOS</button></a>
-        <a href="/configuracao" style="text-decoration: none;"><button class="aba">6 - CONFIGURAÇÃO DO SISTEMA</button></a>
+        <a href="/vendas" class="aba">1 - VENDAS</a>
+        <a href="/estoque" class="aba ativa">2 - ESTOQUE</a>
+        <a href="/caixa" class="aba">3 - CAIXA</a>
+        <a href="/relatorios" class="aba">4 - RELATÓRIOS</a>
+        <a href="/configuracao" class="aba">5 - CONFIGURAÇÃO DO SISTEMA</a>
     </div>
 
+    <!-- 2. BARRA DE FERRAMENTAS -->
+    <div class="barra-ferramentas">
+        <button class="btn-ferramenta" onclick="abrirModalEstoque()">
+            <span class="icone">📦</span>
+            <span class="texto">Estoque</span>
+        </button>
+        <button class="btn-ferramenta" onclick="abrirModalAcao('adicionar')">
+            <span class="icone" style="color: #8b5cf6;">➕</span>
+            <span class="texto">Novo</span>
+        </button>
+        <button class="btn-ferramenta" onclick="abrirModalAcao('alterar')">
+            <span class="icone">✏️</span>
+            <span class="texto">Editar</span>
+        </button>
+        <button class="btn-ferramenta" onclick="abrirModalAcao('remover')">
+            <span class="icone">🗑️</span>
+            <span class="texto">Remover</span>
+        </button>
+        <button class="btn-ferramenta" onclick="abrirModalReajuste()">
+            <span class="icone">💲</span>
+            <span class="texto">Reajustar</span>
+        </button>
+    </div>
+
+    <!-- 3. BARRA DE STATUS -->
+    <div class="barra-status" id="titulo-barra">
+        PAINEL DE GERENCIAMENTO DE ESTOQUE
+    </div>
+
+    <!-- 4. CONTEÚDO PRINCIPAL (Limpo) -->
     <div class="container-principal">
-        <h2 style="margin-bottom: 20px; color: #1e293b;">Gestão de Estoque</h2>
-        
-        <div class="card-form">
-            <form method="POST" class="form-estoque">
-                <input type="text" name="nome" placeholder="Nome do Produto" required>
-                <input type="number" name="quantidade" placeholder="Qtd" required>
-                <input type="text" name="preco" placeholder="Preço (Ex: 10.50)" required>
-                
-                <button type="submit" name="acao" value="adicionar" style="background: #10b981;">Adicionar</button>
-                <button type="submit" name="acao" value="alterar" style="background: #3b82f6;">Atualizar</button>
-                <button type="submit" name="acao" value="remover" style="background: #f43f5e;">Remover</button>
+        <p>Selecione uma opção na barra de ferramentas acima.</p>
+    </div>
+
+    <!-- --- JANELA POP-UP (MODAL) DA TABELA DE ESTOQUE --- -->
+    <div id="modalEstoque" class="modal-overlay">
+        <div class="modal-card" style="max-width: 700px;">
+            <div class="modal-header">
+                <span>Relação de Produtos em Estoque</span>
+                <button class="modal-close" onclick="fecharModalEstoque()">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <table class="tabela-estoque">
+                    <thead>
+                        <tr>
+                            <th>Produto</th>
+                            <th>Quantidade</th>
+                            <th style="text-align: right;">Preço</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in itens %}
+                            <tr onclick="fecharModalEstoque(); preencherEEditar('{{ item[0] }}', '{{ item[1] }}', '{{ item[2] }}', '{{ item[3] }}')">
+                                <td style="font-weight: 600;">{{ item[1] }}</td>
+                                <td>{{ item[2] }}</td>
+                                <td style="text-align: right; font-weight: bold; color: #10b981;">R$ {{ "%.2f"|format(item[3]) }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-modal btn-cancelar" onclick="fecharModalEstoque()">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- --- JANELA POP-UP (MODAL) PARA AÇÕES (NOVO, EDITAR, REMOVER) --- -->
+    <div id="modalAcao" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <span id="tituloModal">Controle de Estoque</span>
+                <button class="modal-close" onclick="fecharModalAcao()">&times;</button>
+            </div>
+            
+            <form action="/estoque" method="POST">
+                <input type="hidden" name="acao" id="inputAcao">
+
+                <div class="modal-body">
+                    <div class="grupo-input" id="divInputNome">
+                        <label>Nome do Produto</label>
+                        <input type="text" name="nome_texto" id="inputNomeTexto" placeholder="Ex: Coca-Cola" autocomplete="off">
+                    </div>
+
+                    <div class="grupo-input" id="divSelectNome" style="display:none;">
+                        <label>Selecionar Produto</label>
+                        <select name="nome" id="selectNomeProduto" onchange="carregarDadosProduto()">
+                            <option value="">Selecione um produto...</option>
+                            {% for item in itens %}
+                                <option value="{{ item[0] }}" data-nome="{{ item[1] }}" data-qtd="{{ item[2] }}" data-preco="{{ item[3] }}">
+                                    {{ item[1] }} (Qtd: {{ item[2] }} | R$ {{ "%.2f"|format(item[3]) }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="grupo-input" id="grupoQtd">
+                        <label>Quantidade</label>
+                        <input type="number" name="quantidade" id="inputQtd" placeholder="Ex: 10" value="1">
+                    </div>
+
+                    <div class="grupo-input" id="grupoPreco">
+                        <label>Preço Unitário (R$)</label>
+                        <input type="text" name="preco" id="inputPreco" placeholder="Ex: 5.99">
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-modal btn-cancelar" onclick="fecharModalAcao()">Cancelar</button>
+                    <button type="submit" class="btn-modal btn-salvar" id="btnSalvarModal">Salvar</button>
+                </div>
             </form>
         </div>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>Produto</th>
-                    <th style="text-align: center;">Quantidade</th>
-                    <th style="text-align: right;">Preço</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in itens %}
-                <tr>
-                    <td>{{ item[1] }}</td>
-                    <td style="text-align: center;">{{ item[2] }}</td>
-                    <td style="text-align: right;">R$ {{ "%.2f"|format(item[3]) }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
     </div>
 
+    <!-- --- JANELA POP-UP (MODAL) DE REAJUSTE (ID Corrigido) --- -->
+    <div id="modalReajuste" class="modal-overlay">
+        <div class="modal-card" style="max-width: 450px;">
+            <div class="modal-header">
+                <span>Reajustar Preços em Massa</span>
+                <button class="modal-close" onclick="fecharModalReajuste()">&times;</button>
+            </div>
+            
+            <form action="/estoque" method="POST">
+                <input type="hidden" name="acao" value="reajustar">
+                <div class="modal-body" style="max-height: none;">
+                    <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">
+                        Informe a porcentagem. Use valores positivos para aumentar (ex: <b>10</b>) ou negativos para diminuir (ex: <b>-5</b>).
+                    </p>
+                    <div class="grupo-input">
+                        <label>Porcentagem (%)</label>
+                        <input type="number" step="0.01" name="valor_reajuste" placeholder="Ex: 10" required>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-modal btn-cancelar" onclick="fecharModalReajuste()">Cancelar</button>
+                    <button type="submit" class="btn-modal btn-salvar">Aplicar Reajuste</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function abrirModalEstoque() {
+            document.getElementById('modalEstoque').style.display = 'flex';
+        }
+
+        function fecharModalEstoque() {
+            document.getElementById('modalEstoque').style.display = 'none';
+        }
+
+        function abrirModalAcao(acao) {
+            document.getElementById('modalAcao').style.display = 'flex';
+            document.getElementById('inputAcao').value = acao;
+
+            const divSelect = document.getElementById('divSelectNome');
+            const divInput = document.getElementById('divInputNome');
+            const inputTexto = document.getElementById('inputNomeTexto');
+            const selectProduto = document.getElementById('selectNomeProduto');
+            const grupoQtd = document.getElementById('grupoQtd');
+            const grupoPreco = document.getElementById('grupoPreco');
+            const tituloModal = document.getElementById('tituloModal');
+
+            if (acao === 'adicionar') {
+                tituloModal.innerText = "Cadastrar Novo Produto";
+                divSelect.style.display = 'none';
+                divInput.style.display = 'flex';
+                selectProduto.removeAttribute('required');
+                inputTexto.setAttribute('required', 'required');
+                inputTexto.value = '';
+                grupoQtd.style.display = 'flex';
+                grupoPreco.style.display = 'flex';
+            } else if (acao === 'alterar') {
+                tituloModal.innerText = "Editar Produto";
+                divSelect.style.display = 'flex';
+                divInput.style.display = 'flex';
+                selectProduto.setAttribute('required', 'required');
+                grupoQtd.style.display = 'flex';
+                grupoPreco.style.display = 'flex';
+            } else if (acao === 'remover') {
+                tituloModal.innerText = "Remover Produto";
+                divSelect.style.display = 'flex';
+                divInput.style.display = 'none';
+                selectProduto.setAttribute('required', 'required');
+                grupoQtd.style.display = 'none';
+                grupoPreco.style.display = 'none';
+            }
+        }
+
+        function fecharModalAcao() {
+            document.getElementById('modalAcao').style.display = 'none';
+        }
+
+        function abrirModalReajuste() {
+            document.getElementById('modalReajuste').style.display = 'flex';
+        }
+
+        function fecharModalReajuste() {
+            document.getElementById('modalReajuste').style.display = 'none';
+        }
+
+        function carregarDadosProduto() {
+            const select = document.getElementById('selectNomeProduto');
+            const option = select.options[select.selectedIndex];
+            
+            if (option.value) {
+                document.getElementById('inputNomeTexto').value = option.getAttribute('data-nome');
+                document.getElementById('inputQtd').value = option.getAttribute('data-qtd');
+                document.getElementById('inputPreco').value = option.getAttribute('data-preco');
+            }
+        }
+
+        function preencherEEditar(id, nome, qtd, preco) {
+            abrirModalAcao('alterar');
+            document.getElementById('selectNomeProduto').value = id;
+            carregarDadosProduto();
+        }
+    </script>
 </body>
 </html>
