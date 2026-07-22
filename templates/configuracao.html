@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuração do Sistema - Fogão Sertanejo</title>
+    <!-- Conecta com o seu arquivo style.css -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <!-- ABAS SUPERIORES -->
+    <div class="abas-container">
+        <!-- Substitua 'home' pelo nome da função que carrega a sua tela inicial (ex: index, dashboard) -->
+        <a href="/vendas" style="text-decoration: none;"><button class="aba">1 - VENDAS</button></a>
+        <a href="/estoque" style="text-decoration: none;"><button class="aba">2 - ESTOQUE</button></a>
+        <a href="/caixa" style="text-decoration: none;"><button class="aba">3 - CAIXA</button></a>
+        <a href="/relatorios" style="text-decoration: none;"><button class="aba">4 - RELATÓRIOS</button></a> 
+        <button class="aba ativa">5 - CONFIGURAÇÃO DO SISTEMA</button>
+    </div>
+
+    <div class="barra-ferramentas">
+    
+        <button onclick="abrirModal()" class="btn-ferramenta" style="border: none; background: transparent; padding: 0;">
+        <span class="icone" style="color: #6366f1;">➕</span> 
+        <span class="texto" style="color: #475569;">CADASTRAR</span>
+        </button>
+
+        <a href="/"class="btn-ferramenta sair" style="text-decoration: none;">
+            <span class="icone" style="color: #ef4444;">❌</span>
+            <span class="texto" style= "color: #475569;">FECHAR</span>
+        </a>
+    </div>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <div class="container-principal" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; height: 100%;">
+        
+
+        <p style="color: #64748b; font-size: 15px; font-weight: 600; margin-bottom: 25px;">
+            Selecione uma opção na barra de ferramentas acima.
+        </p>
+    </div>
+<!-- Estrutura do Pop-up (Modal) -->
+<div id="modalCadastro" class="modal-fundo">
+    <div class="modal-conteudo">
+        
+        <div class="modal-cabecalho">
+            <h3>Cadastrar Novo Usuário</h3>
+            <button class="btn-fechar" onclick="fecharModal()">❌</button>
+        </div>
+        
+        <div class="modal-corpo">
+            <!-- Aqui vai o seu formulário para o Flask processar depois -->
+            <form action="/salvar-usuario" method="POST">
+                <div style="margin-bottom: 15px;">
+                    <label style="font-weight: bold; font-size: 14px;">Nome do Usuário:</label><br>
+                    <input type="text" name="nome" placeholder="Ex: João Silva" required style="width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="font-weight: bold; font-size: 14px;">Senha:</label><br>
+                    <input type="password" name="senha" required style="width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                </div>
+                
+                <button type="submit" style="width: 100%; padding: 10px; background-color: #10b981; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">
+                    SALVAR USUÁRIO
+                </button>
+            </form>
+        </div>
+        
+    </div>
+</div>
+<script>
+    function abrirModal() {
+        // Muda o display de none para flex para aparecer na tela
+        document.getElementById('modalCadastro').style.display = 'flex';
+    }
+
+    function fecharModal() {
+        // Esconde o modal novamente
+        document.getElementById('modalCadastro').style.display = 'none';
+    }
+</script>
+</body>
+</html>

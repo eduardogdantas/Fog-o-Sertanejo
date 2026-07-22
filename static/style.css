@@ -22,6 +22,8 @@ body {
     display: flex;
     padding: 5px 10px 0 10px;
     gap: 4px;
+    align-items: flex-end;
+    border-bottom: none;
 }
 
 .aba {
@@ -33,13 +35,22 @@ body {
     border: none;
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
+    border-bottom-left-radius: 0px;  
+    border-bottom-right-radius: 0px; 
     cursor: pointer;
     transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-block;
 }
 
 .aba.ativa {
     background-color: #f4f6f9;
     color: #1e293b;
+    position: relative;
+    z-index: 10;
+    border-bottom-left-radius: 0px;  
+    border-bottom-right-radius: 0px;
+    margin-bottom: -1px;
 }
 
 .aba:hover:not(.ativa) {
@@ -55,6 +66,8 @@ body {
     padding: 12px 20px;
     border-bottom: 1px solid #e2e8f0;
     box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    position: relative;
+    z-index: 5;
 }
 
 .btn-ferramenta {
@@ -414,4 +427,112 @@ tr:hover {
     .dashboard-cards {
         grid-template-columns: 1fr;
     }
+}
+/* Posicionamento do botão pai */
+.dropdown-aba {
+    position: relative;
+    display: inline-block;
+}
+
+/* A caixa do submenu escondida por padrão */
+.dropdown-conteudo {
+    display: none; /* Esconde a caixa inicialmente */
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: #1e293b;
+    min-width: 220px;
+    box-shadow: 0px 8px 16px rgba(0,0,0,0.4);
+    z-index: 9999;
+    border-radius: 0 0 8px 8px;
+    overflow: hidden;
+    border: 1px solid #334155;
+}
+
+/* Estilo dos links dentro da caixa (tira o azul e o sublinhado) */
+.dropdown-conteudo a {
+    color: #f8fafc !important;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+/* Efeito ao passar o mouse no link de dentro */
+.dropdown-conteudo a:hover {
+    background-color: #334155;
+}
+
+/* O "Pulo do Gato": faz a caixa aparecer quando passa o mouse no botão pai */
+.dropdown-aba:hover .dropdown-conteudo {
+    display: block;
+}
+/* ESTILOS DO POP-UP (MODAL) */
+.modal-fundo {
+    display: none; /* Começa escondido */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(15, 23, 42, 0.7); /* Fundo escuro semi-transparente */
+    z-index: 9999;
+    align-items: center; /* Centraliza verticalmente */
+    justify-content: center; /* Centraliza horizontalmente */
+}
+
+.modal-conteudo {
+    background-color: #ffffff;
+    width: 100%;
+    max-width: 450px;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    overflow: hidden;
+    animation: deslizar 0.3s ease-out; /* Efeito suave ao abrir */
+}
+
+.modal-cabecalho {
+    background-color: #1e293b;
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-cabecalho h3 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.btn-fechar {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 16px;
+    transition: color 0.2s;
+}
+
+.btn-fechar:hover {
+    color: #ef4444; /* Fica vermelho ao passar o mouse */
+}
+
+.modal-corpo {
+    padding: 20px;
+}
+
+/* Animação para o modal surgir de cima */
+@keyframes deslizar {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.caixa-no-meio {
+    display: flex;
+    justify-content: center; 
+    align-items: center; 
+    height: 200px; 
+    
 }

@@ -125,7 +125,7 @@
         }
 
         .card-mesa {
-            background-color: #10b981; /* Verde (Disponível) */
+            background-color: #10b981;
             color: white;
             border: none;
             border-radius: 12px;
@@ -145,7 +145,7 @@
         }
 
         .card-mesa.ocupada {
-            background-color: #f43f5e; /* Vermelho (Ocupada) */
+            background-color: #f43f5e;
         }
 
         .card-mesa .num-mesa {
@@ -171,11 +171,11 @@
 
     <!-- 1. ABAS SUPERIORES -->
     <div class="abas-container">
-        <a href="/vendas" style="text-decoration: none;"><button class="aba">1 - VENDAS</button></a>
+        <a href="/vendas" style="text-decoration: none;"><button class="aba ativa">1 - VENDAS</button></a>
         <a href="/estoque" style="text-decoration: none;"><button class="aba">2 - ESTOQUE</button></a>
         <a href="/caixa" style="text-decoration: none;"><button class="aba">3 - CAIXA</button></a>
         <a href="/relatorios" style="text-decoration: none;"><button class="aba">4 - RELATÓRIOS</button></a>
-        <a href="/configuracao" style="text-decoration: none;"><button class="aba">5 - CONFIGURAÇÃO DO SISTEMA</button></a>
+        <a href="/configuracao" style="text-decoration: none;"><button class="aba">5 - CONFIGURAÇÃO</button></a>
     </div>
 
     <!-- 2. BARRA DE FERRAMENTAS -->
@@ -192,7 +192,7 @@
             <span class="icone">📑</span>
             <span class="texto">Comandas</span>
         </button>
-        <button class="btn-ferramenta">
+        <button class="btn-ferramenta" onclick="abrirModalBalcao()">
             <span class="icone">🍺</span>
             <span class="texto">Balcão</span>
         </button>
@@ -250,9 +250,58 @@
                 {% endfor %}
             {% endif %}
         </div>
-
     </div>
 
+    <!-- --- JANELA POP-UP (MODAL) PARA VENDA DE BALCÃO --- -->
+    <div id="modalBalcao" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(15, 23, 42, 0.7); z-index: 1000; justify-content: center; align-items: center;">
+        <div style="background: white; width: 100%; max-width: 450px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); overflow: hidden;">
+            
+            <div style="background-color: #1e293b; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-weight: bold; font-size: 15px;">🍺 Venda Rápida (Balcão)</span>
+                <button type="button" onclick="fecharModalBalcao()" style="background: none; border: none; color: #94a3b8; font-size: 18px; cursor: pointer;">&times;</button>
+            </div>
+            
+            <form action="/venda-balcao" method="POST">
+                <div style="padding: 20px;">
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="font-size: 12px; font-weight: bold; color: #64748b; display: block; margin-bottom: 5px;">Produto</label>
+                        <select name="produto" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; outline: none;">
+                            <option value="">Selecione o item do estoque...</option>
+                            {% for item in estoque_itens %}
+                                <option value="{{ item[1] }}">{{ item[1] }} (Qtd: {{ item[2] }} | R$ {{ "%.2f"|format(item[3]) }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                        <div style="flex: 1;">
+                            <label style="font-size: 12px; font-weight: bold; color: #64748b; display: block; margin-bottom: 5px;">Quantidade</label>
+                            <input type="number" name="quantidade" value="1" min="1" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; outline: none;">
+                        </div>
+                        <div style="flex: 1;">
+                            <label style="font-size: 12px; font-weight: bold; color: #64748b; display: block; margin-bottom: 5px;">Pagamento</label>
+                            <select name="forma_pagamento" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; outline: none;">
+                                <option value="Dinheiro">Dinheiro</option>
+                                <option value="Pix">Pix</option>
+                                <option value="Débito">Débito</option>
+                                <option value="Crédito">Crédito</option>
+                            </select>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div style="padding: 15px 20px; background-color: #f8fafc; display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid #e2e8f0;">
+                    <button type="button" onclick="fecharModalBalcao()" style="padding: 10px 18px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; background-color: #64748b; color: white;">Cancelar</button>
+                    <button type="submit" style="padding: 10px 18px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; background-color: #10b981; color: white;">Finalizar Venda</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
     <script>
         function mostrarView(tipo) {
             const viewMesas = document.getElementById('view-mesas');
@@ -267,6 +316,14 @@
                 viewMesas.style.display = 'none';
                 viewPracas.style.display = 'block';
             }
+        }
+
+        function abrirModalBalcao() {
+            document.getElementById('modalBalcao').style.display = 'flex';
+        }
+
+        function fecharModalBalcao() {
+            document.getElementById('modalBalcao').style.display = 'none';
         }
     </script>
 </body>

@@ -13,29 +13,44 @@
         <a href="/vendas" style="text-decoration: none;"><button class="aba">1 - VENDAS</button></a>
         <a href="/estoque" style="text-decoration: none;"><button class="aba">2 - ESTOQUE</button></a>
         <a href="/caixa" style="text-decoration: none;"><button class="aba">3 - CAIXA</button></a>
-        <a href="/relatorios" style="text-decoration: none;"><button class="aba">4 - RELATÓRIOS</button></a>
-        <a href="/configuracao" style="text-decoration: none;"><button class="aba">5 - CONFIGURAÇÃO DO SISTEMA</button></a>
+        <a href="/relatorios" style="text-decoration: none;"><button class="aba ativa">4 - RELATÓRIOS</button></a>
+        <a href="/configuracao" style="text-decoration: none;"><button class="aba">5 - CONFIGURAÇÃO</button></a>
     </div>
 
     <!-- 2. CONTEÚDO PRINCIPAL -->
     <div class="container-principal">
         
         <div class="dashboard-header">
-            <h2>Dashboard</h2>
-            <p>Acompanhe a evolução da sua empresa</p>
         </div>
 
         <div class="sub-abas">
-            <button class="sub-aba ativa"><i class="fa-regular fa-calendar"></i> Dados do mês</button>
-            <button class="sub-aba"><i class="fa-solid fa-bolt"></i> Em tempo real</button>
-        </div>
+    <a href="/relatorios?filtro=mes" style="text-decoration: none;">
+        <button class="sub-aba {% if filtro_atual != 'tempo_real' %}ativa{% endif %}">
+            📅 Dados do mês
+        </button>
+    </a>
+    <a href="/relatorios?filtro=tempo_real" style="text-decoration: none;">
+        <button class="sub-aba {% if filtro_atual == 'tempo_real' %}ativa{% endif %}">
+            ⚡ Em tempo real
+        </button>
+    </a>
+</div>
 
-        <div class="seletor-mes">
-            <span>julho 2026 - clique para alterar</span>
-        </div>
-
-        <!-- Cards Dinâmicos integrados com o Python -->
+<!-- Seletor de Mês Interativo -->
+{% if filtro_atual != 'tempo_real' %}
+<div class="seletor-mes" style="padding: 10px; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 20px; text-align: center;">
+    <form method="GET" action="/relatorios" style="display: inline-flex; align-items: center; gap: 10px;">
+        <input type="hidden" name="filtro" value="mes">
+        <label for="mes_ano" style="font-size: 14px; font-weight: 600; color: #475569;">Escolha o mês:</label>
+        <!-- O input type="month" abre o seletor nativo de mês/ano do navegador -->
+        <input type="month" id="mes_ano" name="mes_ano" value="{{ mes_selecionado }}" 
+               onchange="this.form.submit()" 
+               style="padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 14px; outline: none; cursor: pointer;">
+    </form>
+</div>
+{% endif %}
         <div class="dashboard-cards">
+            
             <div class="card-metrica card-azul">
                 <i class="fa-solid fa-utensils icone-card"></i>
                 <span class="titulo-card">Vendas totais</span>
@@ -50,11 +65,13 @@
             </div>
 
             <div class="card-metrica card-roxo">
-                <i class="fa-solid fa-ticket icone-card"></i>
-                <span class="titulo-card">Ticket médio</span>
-                <span class="valor-card">{{ ticket_medio }}</span>
+                <div class="icone-card">🍽️</div>
+                <div class="titulo-card">Prato mais vendido</div>
+                <div class="valor-card" style="font-size: 22px;">{{ prato_destaque_nome }}</div>
+                <div class="sub-valor">{{ prato_destaque_qtd }} unidades vendidas</div>
             </div>
-        </div>
+            
+        </div> <!-- ESSE É O DIV QUE FALTAVA PARA FECHAR OS CARDS! -->
 
         <!-- Filtro -->
         <div class="barra-ferramentas" style="border-radius: 8px; margin-top: 25px; align-items: flex-end;">
@@ -99,6 +116,6 @@
             </table>
         </div>
 
-    </div>
+    </div> 
 </body>
 </html>

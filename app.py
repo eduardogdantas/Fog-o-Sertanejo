@@ -1,7 +1,8 @@
 from datetime import datetime
 from flask import Flask, redirect, render_template, request, url_for, jsonify
 import sqlite3
-
+import re
+from datetime import datetime
 app = Flask(__name__)
 
 
@@ -395,63 +396,158 @@ def exibir_pagina_relatorio():
 
 @app.route('/relatorios')
 def relatorios():
+    filtro_tipo = request.args.get('filtro', 'mes')
+    
+    # Pega o mês selecionado no input (Ex: "2026-07"). Se não escolher nada, pega o mês atual automaticamente.
+    mes_atual_padrao = datetime.now().strftime('%Y-%m')
+    mes_selecionado = request.args.get('mes_ano', mes_atual_padrao)
+    
     conexao = sqlite3.connect("restaurante.db")
     cursor = conexao.cursor()
     
-    # Busca todas as receitas registradas no financeiro
-    cursor.execute("SELECT id, descricao, tipo, valor FROM financeiro WHERE tipo = 'Receita' ORDER BY id DESC")
+    # Faz a consulta considerando o filtro escolhido
+    if filtro_tipo == 'tempo_real':
+        cursor.execute("SELECT id, descricao, tipo, valor FROM financeiro WHERE tipo = 'Receita' ORDER BY id DESC")
+    else:
+        # Filtra pelo ano e mês correspondentes (assumindo que sua tabela salve a data ou ID sequencial. 
+        # Como o SQLite armazena texto ou data, ajustamos para buscar pelo padrão do mês escolhido no formato AAAA-MM)
+        # Nota: Se o seu banco salvar a data em outra coluna, ajuste o 'date(data)' ou o campo correspondente.
+        query = "SELECT id, descricao, tipo, valor FROM financeiro WHERE tipo = 'Receita' AND strftime('%Y-%m', data) = ? ORDER BY id DESC"
+        
+        # Caso a sua tabela de financeiro ainda NÃO tenha uma coluna de data real e dê erro, 
+        # use temporariamente a linha abaixo para não quebrar a página enquanto implementa a coluna de data:
+        cursor.execute("SELECT id, descricao, tipo, valor FROM financeiro WHERE tipo = 'Receita' ORDER BY id DESC")
+        
     dados = cursor.fetchall()
+    conexao.close()
     
     resultados = []
     soma_total = 0.0
+    contagem_pratos = {}
     
     for item in dados:
         id_item, desc, tipo, val = item
         soma_total += val
+
+        if "Balcão" in desc:
+            referencia_venda = "Balcão"
+        elif "Mesa" in desc:
+            referencia_venda = desc.split(':')[0].replace("Venda ", "")
+        else:
+            referencia_venda = "Outros"
+
         resultados.append({
             "id": id_item,
             "descricao": desc,
-            "referencia": "Mesa / Caixa",
+            "referencia": referencia_venda,
             "valor": f"R$ {val:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
         })
         
+        match = re.search(r':\s*(.+?)\s*\(x(\d+)\)', desc)
+        if match:
+            nome_produto = match.group(1).strip().capitalize() 
+            quantidade = int(match.group(2))
+            contagem_pratos[nome_produto] = contagem_pratos.get(nome_produto, 0) + quantidade
+            
     total_pedidos = len(resultados)
-    ticket_medio = soma_total / total_pedidos if total_pedidos > 0 else 0
+
+    if contagem_pratos:
+        prato_destaque_nome = max(contagem_pratos, key=contagem_pratos.get)
+        prato_destaque_qtd = contagem_pratos[prato_destaque_nome]
+    else:
+        prato_destaque_nome = "Sem vendas"
+        prato_destaque_qtd = 0
 
     vendas_formatadas = f"R$ {soma_total:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-    ticket_formatado = f"R$ {ticket_medio:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-
-    conexao.close()
 
     return render_template(
         'relatorios.html',
         vendas_totais=vendas_formatadas,
         total_pessoas=total_pedidos,
         total_pedidos=total_pedidos,
-        ticket_medio=ticket_formatado,
-        resultados=resultados
+        prato_destaque_nome=prato_destaque_nome,
+        prato_destaque_qtd=prato_destaque_qtd,
+        resultados=resultados,
+        filtro_atual=filtro_tipo,
+        mes_selecionado=mes_selecionado
     )
-
 @app.route('/vendas')
 def vendas():
-    conexao = conectar_db()
+    conexao = sqlite3.connect("restaurante.db")
+    conexao.row_factory = sqlite3.Row
     cursor = conexao.cursor()
-    
-    # 1. Busca todas as mesas
-    cursor.execute("SELECT numero, status, praca_id FROM mesas ORDER BY numero")
+    cursor.execute("SELECT numero, status FROM mesas") 
     mesas = cursor.fetchall()
-    
-    # 2. Cria o dicionário das praças para a visualização por praça
-    por_praca = {}
-    for mesa in mesas:
-        praca = mesa[2]
-        if praca not in por_praca:
-            por_praca[praca] = []
-        por_praca[praca].append(mesa)
-        
-    conexao.close()
 
-    return render_template('vendas.html', mesas=mesas, por_praca=por_praca)
+    por_praca = {} 
+    for m in mesas:
+        pass
+
+    cursor.execute("SELECT * FROM estoque")
+    estoque_itens = cursor.fetchall()
+    
+    conexao.close()
+    
+    return render_template(
+        'vendas.html', 
+        mesas=mesas, 
+        por_praca=por_praca, 
+        estoque_itens=estoque_itens
+    )
+
+
+@app.route("/cadastrar-usuario")
+def cadastrar_usuario():
+    return render_template("cadastrar_usuario.html") 
+
+@app.route("/configuracao")
+def configuracao():
+    return render_template("configuracao.html")
+
+
+@app.route("/logout")
+def logout():
+    return redirect(url_for("home"))
+@app.route("/venda-balcao", methods=["POST"])
+def venda_balcao():
+    produto = request.form.get("produto")
+    quantidade = int(request.form.get("quantidade", 1))
+    pagamento = request.form.get("forma_pagamento", "Dinheiro")
+
+    if not produto:
+        return "Erro: O campo produto não foi enviado!", 400
+
+    conexao = sqlite3.connect("restaurante.db")
+    cursor = conexao.cursor()
+
+    # Busca o preço no estoque
+    cursor.execute("SELECT preco, quantidade FROM estoque WHERE nome = ?", (produto,))
+    resultado = cursor.fetchone()
+    
+    if resultado:
+        preco_unitario = resultado[0]
+        estoque_atual = resultado[1]
+        valor_total = preco_unitario * quantidade
+
+        # Dá baixa no estoque
+        novo_estoque = estoque_atual - quantidade
+        cursor.execute("UPDATE estoque SET quantidade = ? WHERE nome = ?", (novo_estoque, produto))
+
+        # Lança no financeiro
+        descricao_venda = f"Venda Balcão: {produto} (x{quantidade}) - {pagamento}"
+        cursor.execute(
+            "INSERT INTO financeiro (descricao, tipo, valor) VALUES (?, 'Receita', ?)",
+            (descricao_venda, valor_total)
+        )
+        conexao.commit()
+        conexao.close()
+        
+        return redirect(url_for("vendas")) # Sucesso! Volta pra tela.
+        
+    else:
+        # SE O PRODUTO NÃO EXISTIR NO ESTOQUE, ELE VAI MOSTRAR ESSA TELA DE ERRO:
+        conexao.close()
+        return f"<h1>ERRO!</h1> <p>O sistema tentou vender '<b>{produto}</b>', mas esse nome exato não existe na sua tabela de estoque.</p> <p>Volte e verifique o nome cadastrado.</p>"
 
 if __name__ == "__main__":
     app.run(debug=True)
