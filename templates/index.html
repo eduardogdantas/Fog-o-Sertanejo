@@ -15,8 +15,6 @@
         body {
             background-color: #f4f6f9;
             color: #333;
-            display: flex;
-            flex-direction: column;
             height: 100vh;
             overflow: hidden;
         }
@@ -60,6 +58,7 @@
             padding: 12px 20px;
             border-bottom: 1px solid #e2e8f0;
             box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            align-items: center;
         }
 
         .btn-ferramenta {
@@ -110,8 +109,8 @@
 
         /* 4. CONTEÚDO PRINCIPAL (GRID DE MESAS) */
         .container-principal {
-            flex: 1;
             padding: 25px;
+            height: calc(100vh - 140px);
             overflow-y: auto;
         }
 
@@ -121,13 +120,14 @@
             gap: 12px;
             max-width: 1400px;
             margin: 0 auto;
+            margin-bottom: 20px;
         }
 
         .card-mesa {
-            background-color: #10b981; /* Verde moderno */
+            background-color: #10b981;
             color: white;
             border: none;
-            border-radius: 12px; /* Geometria arredondada */
+            border-radius: 12px;
             padding: 20px 10px;
             display: flex;
             flex-direction: column;
@@ -144,7 +144,7 @@
         }
 
         .card-mesa.ocupada {
-            background-color: #f43f5e; /* Vermelho moderno */
+            background-color: #f43f5e;
         }
 
         .card-mesa .num-mesa {
@@ -153,12 +153,101 @@
             margin-bottom: 4px;
         }
 
-        .card-mesa .status-mesa {
-            font-size: 12px;
-            opacity: 0.9;
+        /* 5. ESTILO DOS MODAIS (JANELAS FLUTUANTES) */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.6);
+            justify-content: center;
+            align-items: center;
+            z-index: 999999;
         }
 
-        /* RESPONSIVIDADE SIMPLES */
+        .modal-content {
+            background-color: #ffffff;
+            width: 450px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background-color: #1e293b;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-group {
+            margin-bottom: 15px;
+        }
+
+        .modal-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 5px;
+        }
+
+        .modal-group input, .modal-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .modal-footer {
+            padding: 15px 20px;
+            background-color: #f8fafc;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .btn-cancelar {
+            background-color: #64748b;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-salvar {
+            background-color: #10b981;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
         @media (max-width: 1024px) {
             .grid-mesas {
                 grid-template-columns: repeat(6, 1fr);
@@ -171,104 +260,309 @@
         }
     </style>
 </head>
-<body>
+<body style="margin: 0; background-color: #f4f6f9;">
 
-    <div class="abas-container">
-        <a href="/vendas" style="text-decoration: none;"><button class="aba">1 - VENDAS</button></a>
-        <a href="/estoque" style="text-decoration: none;"><button class="aba">2 - ESTOQUE</button></a>
-        <a href="/caixa" style="text-decoration: none;"><button class="aba">3 - CAIXA</button></a>
-        <a href="/relatorios" style="text-decoration: none;"><button class="aba">4 - RELATÓRIOS</button></a>
-        <a href="/configuracao" style="text-decoration: none;"><button class="aba">5 - CONFIGURAÇÃO DO SISTEMA</button></a>
-    </div>
-
-    <div class="barra-ferramentas">
-        <button class="btn-ferramenta" onclick="mostrarView('mesas')">
-            <span class="icone">🪑</span>
-            <span class="texto">Mesas</span>
-        </button>
-        <button class="btn-ferramenta" onclick="mostrarView('pracas')">
-            <span class="icone">🌳</span>
-            <span class="texto">Praça</span>
-        </button>
-        <button class="btn-ferramenta">
-            <span class="icone">📑</span>
-            <span class="texto">Comandas</span>
-        </button>
-        <button class="btn-ferramenta">
-            <span class="icone">🍺</span>
-            <span class="texto">Balcão</span>
-        </button>
-        <button class="btn-ferramenta">
-            <span class="icone">🖨️</span>
-            <span class="texto">Cupom</span>
-        </button>
-        <button class="btn-ferramenta">
-            <span class="icone">📋</span>
-            <span class="texto">Delivery</span>
-        </button>
-        <button class="btn-ferramenta sair">
-            <span class="icone">❌</span>
-            <span class="texto">Sair</span>
-        </button>
-    </div>
-
-    <!-- ... (resto do seu código anterior) -->
-
-    <div class="barra-status">
-        MAPA DE ATENDIMENTO DO SALÃO - 40 MESAS
-    </div>
-
-<!-- Container Principal que controla o espaço restante -->
-    <div class="container-principal">
-    <div style="padding: 20px; text-align: center;">
-</div>
-
-<!-- Container Mesas (Oculto por padrão) -->
-    <div id="view-mesas">
-    <div class="grid-mesas">
-        {% for mesa in mesas %}
-            <a href="{{ url_for('ver_mesa', numero_mesa=mesa[0]) }}" style="text-decoration: none;">
-                <div class="card-mesa {% if mesa[1]|lower == 'ocupada' %}ocupada{% endif %}">
-                    <span class="num-mesa">Mesa {{ mesa[0] }}</span>
-                </div>
-            </a>
-        {% endfor %}
-    </div>
-</div>
-
-<!-- Container PRAÇAS -->
-<div id="view-pracas" style="display: none;">
-    {% for praca_id, mesas_da_praca in por_praca.items() %}
-        <h3 style="margin: 20px;">Praça {{ praca_id }}</h3>
-        <div class="grid-mesas">
-            {% for mesa in mesas_da_praca %}
-                <a href="{{ url_for('ver_mesa', numero_mesa=mesa[0]) }}" style="text-decoration: none;">
-                    <div class="card-mesa {% if mesa[1]|lower == 'ocupada' %}ocupada{% endif %}">
-                        <span class="num-mesa">Mesa {{ mesa[0] }}</span>
-                    </div>
-                </a>
-            {% endfor %}
+    <!-- TELA DE LOGIN -->
+    <div id="login-container" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #1e293b; display: flex; justify-content: center; align-items: center; z-index: 99999;">
+        <div style="background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); width: 300px; text-align: center;">
+            <h2 style="margin-bottom: 20px; color: #333; font-family: Arial, sans-serif;">Login do Sistema</h2>
+            
+            <form onsubmit="realizarLogin(event)">
+                <input type="text" id="usuario" placeholder="Usuário" style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                
+                <input type="password" id="senha" placeholder="Senha" style="width: 100%; padding: 10px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                
+                <button type="submit" style="width: 100%; padding: 10px; background-color: #0d9488; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">Entrar</button>
+            </form>
+            
+            <p id="erro-msg" style="color: red; margin-top: 10px; font-size: 14px; display: none;">Usuário ou senha incorretos!</p>
         </div>
-    {% endfor %}
-</div>
-<script>
-    function mostrarView(tipo) {
-        const viewMesas = document.getElementById('view-mesas');
-        const viewPracas = document.getElementById('view-pracas');
+    </div>
 
-        if (!viewMesas || !viewPracas) {
-            console.error("ERRO: Elementos não encontrados no HTML!");
-            return;
+    <!-- SISTEMA PRINCIPAL -->
+    <div id="app-principal" style="display: none;">
+        
+        <div class="abas-container">
+            <a href="/vendas" style="text-decoration: none;"><button class="aba">1 - VENDAS</button></a>
+            <a href="/estoque" style="text-decoration: none;"><button class="aba">2 - ESTOQUE</button></a>
+            <a href="/caixa" style="text-decoration: none;"><button class="aba">3 - CAIXA</button></a>
+            <a href="/relatorios" style="text-decoration: none;"><button class="aba">4 - RELATÓRIOS</button></a>
+            <a href="/configuracao" style="text-decoration: none;"><button class="aba">5 - CONFIGURAÇÃO DO SISTEMA</button></a>
+        </div>
+
+        <div class="barra-ferramentas">
+            <button class="btn-ferramenta" onclick="mostrarView('mesas')">
+                <span class="icone">🪑</span>
+                <span class="texto">Mesas</span>
+            </button>
+            <button class="btn-ferramenta" onclick="mostrarView('pracas')">
+                <span class="icone">🌳</span>
+                <span class="texto">Praça</span>
+            </button>
+            <button class="btn-ferramenta">
+                <span class="icone">📑</span>
+                <span class="texto">Comandas</span>
+            </button>
+            <button class="btn-ferramenta" onclick="abrirModalBalcao()">
+                <span class="icone">🍺</span>
+                <span class="texto">Balcão</span>
+            </button>
+            <button class="btn-ferramenta">
+                <span class="icone">🖨️</span>
+                <span class="texto">Cupom</span>
+            </button>
+            <button class="btn-ferramenta">
+                <span class="icone">📋</span>
+                <span class="texto">Delivery</span>
+            </button>
+            <button class="btn-ferramenta sair" onclick="sairDoSistema()">
+                <span class="icone">❌</span>
+                <span class="texto">Sair</span>
+            </button>
+        </div>
+
+        <div class="barra-status" id="barra-status-texto">
+            MAPA DE ATENDIMENTO DO SALÃO - 40 MESAS
+        </div>
+
+        <div class="container-principal">
+            <!-- Container Mesas -->
+            <div id="view-mesas" style="display: block;">
+                <div class="grid-mesas">
+                    {% for mesa in mesas %}
+                        <a href="{{ url_for('ver_mesa', numero_mesa=mesa[0]) }}" style="text-decoration: none;">
+                            <div class="card-mesa {% if mesa[1]|lower == 'ocupada' %}ocupada{% endif %}">
+                                <span class="num-mesa">Mesa {{ mesa[0] }}</span>
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Container PRAÇAS -->
+            <div id="view-pracas" style="display: none;">
+                {% for praca_id, mesas_da_praca in por_praca.items() %}
+                    <h3 style="margin: 20px 0 10px 0; color: #1e293b;">Praça {{ praca_id }}</h3>
+                    <div class="grid-mesas">
+                        {% for mesa in mesas_da_praca %}
+                            <a href="{{ url_for('ver_mesa', numero_mesa=mesa[0]) }}" style="text-decoration: none;">
+                                <div class="card-mesa {% if mesa[1]|lower == 'ocupada' %}ocupada{% endif %}">
+                                    <span class="num-mesa">Mesa {{ mesa[0] }}</span>
+                                </div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MODAL 1: PEDIR SENHA DE ADM ANTES DE CADASTRAR -->
+    <div id="modal-senha-adm" class="modal-overlay">
+        <div class="modal-content" style="width: 350px;">
+            <div class="modal-header">
+                <span>Acesso Restrito - ADM</span>
+                <button class="modal-close" onclick="fecharModalAdm()">✕</button>
+            </div>
+            <div class="modal-body">
+                <form onsubmit="verificarSenhaAdm(event)">
+                    <div class="modal-group">
+                        <label>Senha do Administrador</label>
+                        <input type="password" id="senha-adm-input" placeholder="Digite a senha ADM" required>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-cancelar" onclick="fecharModalAdm()">Cancelar</button>
+                        <button type="submit" class="btn-salvar">Confirmar</button>
+                    </div>
+                </form>
+                <p id="erro-adm-msg" style="color: red; margin-top: 10px; font-size: 13px; display: none; text-align: center;">Senha de ADM incorreta!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: TELA DE CADASTRAR NOVO USUÁRIO -->
+    <div id="modal-cadastrar-usuario" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span>Cadastrar Novo Usuário</span>
+            <button class="modal-close" onclick="fecharModalUsuario()">✕</button>
+        </div>
+        <div class="modal-body">
+        <form id="form-novo-usuario" action="/salvar-novo-usuario" method="POST">
+    <div class="modal-group">
+        <label>Nome do Usuário</label>
+        <input type="text" id="novo-usuario-nome" name="nome" placeholder="Ex: João Silva" required>
+    </div>
+
+    <div class="modal-group">
+        <label>Login / Usuário</label>
+        <input type="text" id="novo-usuario-login" name="usuario" placeholder="Ex: joao.silva" required>
+    </div>
+
+    <div class="modal-group">
+        <label>Senha</label>
+        <input type="password" id="novo-usuario-senha" name="senha" placeholder="Digite a senha" required>
+    </div>
+
+    <div class="modal-footer">
+        <button type="button" class="btn-cancelar" onclick="fecharModalUsuario()">Fechar</button>
+        <button type="submit" class="btn-salvar">Cadastrar</button>
+    </div>
+</form>
+
+    <!-- JANELA FLUTUANTE (MODAL) DO BALCÃO -->
+    <div id="modal-balcao" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>Venda Rápida - Balcão</span>
+                <button class="modal-close" onclick="fecharModalBalcao()">✕</button>
+            </div>
+            
+            <div class="modal-body">
+                <form id="form-balcao" onsubmit="salvarVendaBalcao(event)">
+                    <div class="modal-group">
+                        <label>Nome do Produto</label>
+                        <input type="text" id="balcao-produto" placeholder="Ex: Coca-Cola" required>
+                    </div>
+
+                    <div class="modal-group">
+                        <label>Quantidade</label>
+                        <input type="number" id="balcao-quantidade" value="1" min="1" required>
+                    </div>
+
+                    <div class="modal-group">
+                        <label>Forma de Pagamento</label>
+                        <select id="balcao-pagamento" required>
+                            <option value="">Selecione...</option>
+                            <option value="Dinheiro">Dinheiro</option>
+                            <option value="Pix">Pix</option>
+                            <option value="Cartao Credito">Cartão de Crédito</option>
+                            <option value="Cartao Debito">Cartão de Débito</option>
+                        </select>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn-cancelar" onclick="fecharModalBalcao()">Cancelar</button>
+                        <button type="submit" class="btn-salvar">Salvar Venda</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script>
+        function mostrarView(tipo) {
+            const viewMesas = document.getElementById('view-mesas');
+            const viewPracas = document.getElementById('view-pracas');
+            const barraStatus = document.getElementById('barra-status-texto');
+
+            if (tipo === 'mesas') {
+                viewMesas.style.display = 'block';
+                viewPracas.style.display = 'none';
+                if (barraStatus) barraStatus.innerText = "MAPA DE ATENDIMENTO DO SALÃO - 40 MESAS";
+            } else if (tipo === 'pracas') {
+                viewMesas.style.display = 'none';
+                viewPracas.style.display = 'block';
+                if (barraStatus) barraStatus.innerText = "MAPA DE ATENDIMENTO - PRAÇA DE ALIMENTAÇÃO";
+            }
         }
 
-        if (tipo === 'mesas') {
-            viewMesas.style.display = 'block';
-            viewPracas.style.display = 'none';
-        } else if (tipo === 'pracas') {
-            viewMesas.style.display = 'none';
-            viewPracas.style.display = 'block';
+        // Funções do Modal de Balcão
+        function abrirModalBalcao() {
+            document.getElementById('modal-balcao').style.display = 'flex';
         }
-    }
-</script>
+
+        function fecharModalBalcao() {
+            document.getElementById('modal-balcao').style.display = 'none';
+            document.getElementById('form-balcao').reset();
+        }
+
+        function salvarVendaBalcao(event) {
+            event.preventDefault();
+            fecharModalBalcao();
+        }
+
+        // Funções de Segurança e Cadastro de Usuário (ADM)
+        function abrirVerificacaoAdm() {
+            document.getElementById('senha-adm-input').value = "";
+            document.getElementById('erro-adm-msg').style.display = "none";
+            document.getElementById('modal-senha-adm').style.display = 'flex';
+        }
+
+        function fecharModalAdm() {
+            document.getElementById('modal-senha-adm').style.display = 'none';
+        }
+
+        function verificarSenhaAdm(event) {
+            event.preventDefault();
+            const senhaDigitada = document.getElementById('senha-adm-input').value;
+            
+            // Senha de Administrador configurada
+            const senhaAdmCorreta = "9999"; 
+
+            if (senhaDigitada === senhaAdmCorreta) {
+                fecharModalAdm();
+                document.getElementById('modal-cadastrar-usuario').style.display = 'flex';
+            } else {
+                document.getElementById('erro-adm-msg').style.display = "block";
+            }
+        }
+
+        function fecharModalUsuario() {
+            document.getElementById('modal-cadastrar-usuario').style.display = 'none';
+            document.getElementById('form-novo-usuario').reset();
+        }
+
+        // Funções de Login e Logout do Sistema
+        function realizarLogin(event) {
+            event.preventDefault();
+
+            const usuarioInput = document.getElementById("usuario").value;
+            const senhaInput = document.getElementById("senha").value;
+
+            const usuarioCorreto = "admin";
+            const senhaCorreta = "1234";
+
+            if (usuarioInput === usuarioCorreto && senhaInput === senhaCorreta) {
+                document.getElementById("login-container").style.display = "none";
+                document.getElementById("app-principal").style.display = "block";
+            } else {
+                document.getElementById("erro-msg").style.display = "block";
+            }
+        }
+
+        function sairDoSistema() {
+            document.getElementById("usuario").value = "";
+            document.getElementById("senha").value = "";
+            document.getElementById("erro-msg").style.display = "none";
+            document.getElementById("app-principal").style.display = "none";
+            document.getElementById("login-container").style.display = "flex";
+        }
+        function enviarCadastro(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(document.getElementById('form-novo-usuario'));
+
+    fetch('/salvar-novo-usuario', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.sucesso) {
+            alert('Usuário cadastrado com sucesso!');
+            fecharModalUsuario();
+        } else {
+            alert('Erro ao cadastrar usuário. O login já pode existir.');
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        alert('Erro de conexão com o servidor.');
+    });
+}
+    </script>
 </body>
 </html>

@@ -327,14 +327,25 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for item in itens %}
-                            <tr onclick="fecharModalEstoque(); preencherEEditar('{{ item[0] }}', '{{ item[1] }}', '{{ item[2] }}', '{{ item[3] }}')">
-                                <td style="font-weight: 600;">{{ item[1] }}</td>
-                                <td>{{ item[2] }}</td>
-                                <td style="text-align: right; font-weight: bold; color: #10b981;">R$ {{ "%.2f"|format(item[3]) }}</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
+    {% for item in itens %}
+        <tr onclick="fecharModalEstoque(); preencherEEditar('{{ item[0] }}', '{{ item[1] }}', '{{ item[2] }}', '{{ item[3] }}')" style="cursor: pointer;">
+            <!-- Nome do Produto -->
+            <td style="font-weight: 600;">{{ item[1] }}</td>
+            
+            <!-- Quantidade com Verificação de Esgotado -->
+            <td>
+                {% if item[2] <= 0 %}
+                    <span style="color: #ef4444; font-weight: bold;">Produto Esgotado</span>
+                {% else %}
+                    {{ item[2] }}
+                {% endif %}
+            </td>
+            
+            <!-- Preço -->
+            <td style="text-align: right; font-weight: bold; color: #10b981;">R$ {{ "%.2f"|format(item[3]) }}</td>
+        </tr>
+    {% endfor %}
+</tbody>
                 </table>
             </div>
 

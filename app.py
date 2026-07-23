@@ -5,17 +5,14 @@ import re
 from datetime import datetime
 app = Flask(__name__)
 
-
 def conectar_db():
   return sqlite3.connect("restaurante.db")
-
 
 @app.route("/")
 def home():
   conexao = sqlite3.connect("restaurante.db")
   cursor = conexao.cursor()
 
-  # 1. Busca todas as mesas
   cursor.execute("SELECT numero, status, praca_id FROM mesas ORDER BY numero")
   mesas = cursor.fetchall()
 
@@ -29,8 +26,6 @@ def home():
 
   conexao.close()
 
-  # DEBUG: Isso vai imprimir no seu terminal do VS Code
-  print(f"DEBUG: Encontrei {len(mesas)} mesas no banco.")
 
   return render_template("index.html", mesas=mesas, por_praca=por_praca)
 
@@ -494,12 +489,6 @@ def vendas():
         por_praca=por_praca, 
         estoque_itens=estoque_itens
     )
-
-
-@app.route("/cadastrar-usuario")
-def cadastrar_usuario():
-    return render_template("cadastrar_usuario.html") 
-
 @app.route("/configuracao")
 def configuracao():
     return render_template("configuracao.html")
@@ -548,6 +537,36 @@ def venda_balcao():
         # SE O PRODUTO NÃO EXISTIR NO ESTOQUE, ELE VAI MOSTRAR ESSA TELA DE ERRO:
         conexao.close()
         return f"<h1>ERRO!</h1> <p>O sistema tentou vender '<b>{produto}</b>', mas esse nome exato não existe na sua tabela de estoque.</p> <p>Volte e verifique o nome cadastrado.</p>"
-
+    
+@app.route('/salvar-novo-usuario', methods=['POST'])
+def salvar_novo_usuario():
+    nome = request.form.get('nome')
+    usuario = request.form.get('usuario')
+    senha = request.form.get('senha')
+    
+    conexao = conectar_db()
+    cursor = conexao.cursor()
+    
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS usuarios (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nome TEXT,
+            usuario TEXT UNIQUE,
+            senha TEXT
+        )
+    """)
+    
+    try:
+        cursor.execute(
+            "INSERT INTO usuarios (nome, usuario, senha) VALUES (?, ?, ?)",
+            (nome, usuario, senha)
+        )
+        conexao.commit()
+    except Exception as e:
+        print(f"Erro ao cadastrar usuário: {e}")
+    finally:
+        conexao.close()
+        
+    return redirect(url_for('home'))
 if __name__ == "__main__":
     app.run(debug=True)
