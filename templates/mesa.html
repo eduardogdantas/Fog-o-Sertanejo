@@ -147,16 +147,18 @@
             margin-bottom: 5px;
         }
 
-        .grupo-input input {
+        /* ADICIONADO: .grupo-input select para herdar os mesmos estilos do input */
+        .grupo-input input, .grupo-input select {
             padding: 10px 14px;
             border: 1px solid #cbd5e1;
             border-radius: 8px;
             font-size: 14px;
             outline: none;
             transition: border-color 0.2s;
+            background-color: white;
         }
 
-        .grupo-input input:focus {
+        .grupo-input input:focus, .grupo-input select:focus {
             border-color: #3b82f6;
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
@@ -250,7 +252,19 @@
         <form action="/adicionar_pedido/{{ mesa[0] }}" method="POST" class="form-pedido">
             <div class="grupo-input">
                 <label for="produto">Produto</label>
-                <input type="text" id="produto" name="produto" placeholder="Ex: Baião de Dois / Coca-Cola" required autocomplete="off">
+                <!-- O input de texto foi removido e substituído por este Select -->
+                <select id="produto" name="produto" required>
+                    <option value="" disabled selected>Selecione um produto...</option>
+                    
+                    {% for categoria, lista_produtos in produtos_por_categoria.items() %}
+
+                    <optgroup label="{{ categoria }}"></optgroup>
+                    {% for prod in lista_produtos %}
+                    <option value="{{ prod.nome }}">{{ prod.nome }}</option>
+            {% endfor %}
+        </optgroup>
+        {% endfor %}
+                </select>
             </div>
             <div class="grupo-input">
                 <label for="quantidade">Qtd</label>

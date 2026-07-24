@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastrar Usuário - Sistema</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { background-color: #f4f6f9; color: #333; display: flex; flex-direction: column; height: 100vh; }
+        
+        .abas-container { background-color: #1e293b; display: flex; padding: 5px 10px 0 10px; gap: 4px; }
+        .aba { padding: 10px 20px; color: #94a3b8; background-color: #334155; font-size: 13px; font-weight: bold; border: none; border-top-left-radius: 8px; border-top-right-radius: 8px; cursor: pointer; text-decoration: none; display: inline-block; }
+        .aba.ativa { background-color: #f4f6f9; color: #1e293b; }
+        
+        .container-principal { padding: 40px; display: flex; justify-content: center; align-items: center; flex: 1; }
+        .card-formulario { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); width: 100%; max-width: 400px; }
+        .card-formulario h2 { margin-bottom: 20px; color: #1e293b; font-size: 20px; text-align: center; }
+        
+        .modal-group { margin-bottom: 15px; }
+        .modal-group label { display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 5px; }
+        .modal-group input { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; }
+        
+        .btn-salvar { background-color: #10b981; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; font-size: 15px; margin-top: 10px; }
+        .btn-salvar:hover { background-color: #059669; }
+    </style>
+</head>
+<body>
+
+    <div class="abas-container">
+        <a href="/vendas" class="aba">1 - VENDAS</a>
+        <a href="/estoque" class="aba">2 - ESTOQUE</a>
+        <a href="/caixa" class="aba">3 - CAIXA</a>
+        <a href="/relatorios" class="aba">4 - RELATÓRIOS</a>
+        <a href="/configuracao" class="aba">5 - CONFIGURAÇÃO</a>
+        <a href="/usuario" class="aba ativa">6 - USUÁRIOS</a>
+    </div>
+
+    <div class="container-principal">
+        <div class="card-formulario">
+            <h2>Cadastrar Novo Usuário</h2>
+            <form action="/salvar_novo_usuario" method="POST">
+                <div class="modal-group">
+                    <label>Nome do Usuário</label>
+                    <input type="text" name="nome" placeholder="Ex: João Silva" required>
+                </div>
+                <div class="modal-group">
+                    <label>Senha</label>
+                    <input type="password" name="senha" placeholder="Digite a senha" required>
+                </div>
+                <button type="submit" class="btn-salvar">Salvar Usuário</button>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>

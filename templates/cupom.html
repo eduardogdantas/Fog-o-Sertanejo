@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Cupom Mesa {{ numero_mesa }}</title>
+    <style>
+        /* Estilo para simular papel de bobina térmica */
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            color: #000;
+            margin: 0;
+            padding: 15px;
+            width: 300px; /* Largura padrão de impressora térmica */
+        }
+        .center {
+            text-align: center;
+        }
+        .divisor {
+            border-top: 1px dashed #000;
+            margin: 10px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            text-align: left;
+            padding: 2px 0;
+        }
+        .text-right {
+            text-align: right;
+        }
+        .bold {
+            font-weight: bold;
+        }
+        
+        @media print {
+            body { width: auto; padding: 0; }
+        }
+    </style>
+</head>
+<body onload="window.print(); window.onafterprint = function(){ window.close(); }">
+
+    <div class="center bold">
+        <h2>FOGÃO SERTANEJO</h2>
+        <p>CNPJ: 00.000.000/0001-00</p>
+        <p>CUPOM DE CONFERÊNCIA DE MESA</p>
+    </div>
+
+    <div class="divisor"></div>
+    <p><b>Mesa:</b> {{ numero_mesa }}</p>
+    <p><b>Data:</b> {{ data_hora }}</p>
+    <div class="divisor"></div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Qtd</th>
+                <th>Produto</th>
+                <th class="text-right">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pedido in pedidos %}
+                <tr>
+                    <td>{{ pedido.quantidade }}x</td>
+                    <td>{{ pedido.produto }}</td>
+                    <td class="text-right">R$ {{ "%.2f"|format(pedido.subtotal) }}</td>
+                </tr>
+            {% else %}
+                <!-- Se não achar nada no banco, ele mostra este aviso na tela -->
+                <tr>
+                    <td colspan="3" class="center">Nenhum pedido encontrado.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="divisor"></div>
+    
+    <table>
+        <tr>
+            <td class="bold">TOTAL A PAGAR:</td>
+            <td class="text-right bold">R$ {{ "%.2f"|format(total) }}</td>
+        </tr>
+    </table>
+
+    <div class="divisor"></div>
+    <p class="center">Obrigado pela preferência!</p>
+    <p class="center">Volte sempre.</p>
+
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>2ª Via - Mesa {{ mesa }}</title>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            color: #000;
+            margin: 0;
+            padding: 15px;
+            width: 300px;
+        }
+        .center { text-align: center; }
+        .divisor { border-top: 1px dashed #000; margin: 10px 0; }
+        .bold { font-weight: bold; }
+        .text-right { text-align: right; }
+        @media print { body { width: auto; padding: 0; } }
+    </style>
+</head>
+<body onload="window.print(); window.onafterprint = function(){ window.close(); }">
+
+    <div class="center bold">
+        <h2>FOGÃO SERTANEJO</h2>
+        <p>CNPJ: 00.000.000/0001-00</p>
+        <p>*** 2ª VIA DE COMANDA ***</p>
+    </div>
+
+    <div class="divisor"></div>
+    <p><b>Mesa Fechada:</b> {{ mesa }}</p>
+    <p><b>Data Original:</b> {{ data_hora }}</p>
+    <div class="divisor"></div>
+
+    <p class="bold">Itens Consumidos:</p>
+    <p>{{ detalhes.replace(' | ', '<br>')|safe }}</p>
+
+    <div class="divisor"></div>
+    
+    <table width="100%">
+        <tr>
+            <td class="bold">TOTAL PAGO:</td>
+            <td class="text-right bold">R$ {{ "%.2f"|format(total) }}</td>
+        </tr>
+    </table>
+
+    <div class="divisor"></div>
+    <p class="center">Reimpressão Autorizada</p>
+
+</body>
+</html>

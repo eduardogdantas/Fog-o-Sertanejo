@@ -3,83 +3,202 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configuração do Sistema - Fogão Sertanejo</title>
-    <!-- Conecta com o seu arquivo style.css -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Configurações - Gestão de Usuários</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { background-color: #f4f6f9; color: #333; height: 100vh; overflow: hidden; }
+        
+        .abas-container { background-color: #1e293b; display: flex; padding: 5px 10px 0 10px; gap: 4px; }
+        .aba { padding: 10px 20px; color: #94a3b8; background-color: #334155; font-size: 13px; font-weight: bold; border: none; border-top-left-radius: 8px; border-top-right-radius: 8px; cursor: pointer; text-decoration: none; display: inline-block; }
+        .aba.ativa { background-color: #f4f6f9; color: #1e293b; }
+        .aba:hover:not(.ativa) { background-color: #475569; color: #fff; }
+
+        .barra-ferramentas {
+            background-color: #ffffff;
+            display: flex;
+            gap: 15px;
+            padding: 12px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            align-items: center;
+        }
+
+        .btn-ferramenta {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            width: 85px;
+            padding: 8px;
+            border-radius: 10px;
+            transition: background 0.2s;
+        }
+
+        .btn-ferramenta:hover { background-color: #f1f5f9; }
+        .btn-ferramenta .icone { font-size: 22px; margin-bottom: 4px; }
+        .btn-ferramenta .texto { font-size: 11px; font-weight: 700; color: #475569; text-align: center; text-transform: uppercase; }
+
+        .container-principal { padding: 30px; display: flex; justify-content: center; align-items: flex-start; height: calc(100vh - 120px); overflow-y: auto; }
+        .painel-config { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); width: 100%; max-width: 700px; }
+        .painel-config h2 { margin-bottom: 15px; color: #1e293b; font-size: 20px; display: flex; justify-content: space-between; align-items: center; }
+
+        /* TABELA DE USUÁRIOS */
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 14px; }
+        th { background-color: #f8fafc; color: #475569; font-weight: 600; }
+        
+        .btn-acao-tabela { padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; border: none; }
+        .btn-excluir { background-color: #ef4444; color: white; }
+        .btn-excluir:hover { background-color: #dc2626; }
+        .btn-novo { background-color: #10b981; color: white; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: bold; border: none; cursor: pointer; }
+        .btn-novo:hover { background-color: #059669; }
+
+        /* ESTILO DOS MODAIS */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background-color: rgba(0, 0, 0, 0.6);
+            justify-content: center;
+            align-items: center;
+            z-index: 999999;
+        }
+
+        .modal-content {
+            background-color: #ffffff;
+            width: 380px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            text-align: left;
+        }
+
+        .modal-header {
+            background-color: #1e293b;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        .modal-close { background: none; border: none; color: white; font-size: 18px; cursor: pointer; }
+        .modal-body { padding: 20px; }
+        .modal-group { margin-bottom: 15px; }
+        .modal-group label { display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 5px; }
+        .modal-group input { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; box-sizing: border-box; }
+        
+        .modal-footer { padding: 15px 20px; background-color: #f8fafc; display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid #e2e8f0; }
+        .btn-cancelar { background-color: #64748b; color: white; border: none; padding: 10px 18px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        .btn-salvar { background-color: #10b981; color: white; border: none; padding: 10px 18px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        .btn-salvar:hover { background-color: #059669; }
+    </style>
 </head>
 <body>
 
-    <!-- ABAS SUPERIORES -->
     <div class="abas-container">
-        <!-- Substitua 'home' pelo nome da função que carrega a sua tela inicial (ex: index, dashboard) -->
         <a href="/vendas" style="text-decoration: none;"><button class="aba">1 - VENDAS</button></a>
         <a href="/estoque" style="text-decoration: none;"><button class="aba">2 - ESTOQUE</button></a>
         <a href="/caixa" style="text-decoration: none;"><button class="aba">3 - CAIXA</button></a>
-        <a href="/relatorios" style="text-decoration: none;"><button class="aba">4 - RELATÓRIOS</button></a> 
-        <button class="aba ativa">5 - CONFIGURAÇÃO DO SISTEMA</button>
+        <a href="/relatorios" style="text-decoration: none;"><button class="aba">4 - RELATÓRIOS</button></a>
+        <a href="/configuracao" style="text-decoration: none;"><button class="aba ativa">5 - CONFIGURAÇÃO</button></a>
     </div>
 
+    <!-- BARRA DE FERRAMENTAS -->
     <div class="barra-ferramentas">
-    
-        <button onclick="abrirModal()" class="btn-ferramenta" style="border: none; background: transparent; padding: 0;">
-        <span class="icone" style="color: #6366f1;">➕</span> 
-        <span class="texto" style="color: #475569;">CADASTRAR</span>
+        <button class="btn-ferramenta" onclick="abrirModalUsuario()">
+            <span class="icone">👤</span>
+            <span class="texto">Novo Usuário</span>
         </button>
-
-        <a href="/"class="btn-ferramenta sair" style="text-decoration: none;">
+        
+        <button class="btn-ferramenta" onclick="fecharSistema()">
             <span class="icone" style="color: #ef4444;">❌</span>
-            <span class="texto" style= "color: #475569;">FECHAR</span>
+            <span class="texto">Fechar</span>
+        </button>
         </a>
     </div>
 
-    <!-- CONTEÚDO PRINCIPAL -->
-    <div class="container-principal" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; height: 100%;">
-        
-
-        <p style="color: #64748b; font-size: 15px; font-weight: 600; margin-bottom: 25px;">
-            Selecione uma opção na barra de ferramentas acima.
-        </p>
-    </div>
-<!-- Estrutura do Pop-up (Modal) -->
-<div id="modalCadastro" class="modal-fundo">
-    <div class="modal-conteudo">
-        
-        <div class="modal-cabecalho">
-            <h3>Cadastrar Novo Usuário</h3>
-            <button class="btn-fechar" onclick="fecharModal()">❌</button>
+    <div class="container-principal">
+        <div class="painel-config">
+            <h2>
+                <span>Gerenciamento de Usuários</span>
+                <button class="btn-novo" onclick="abrirModalUsuario()">+ Adicionar Usuário</button>
+            </h2>
+            <p style="color: #64748b; font-size: 13px; margin-bottom: 10px;">Usuários com acesso cadastrados no sistema:</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome do Usuário</th>
+                        <th style="text-align: right;">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in usuarios %}
+                    <tr>
+                        <td>#{{ u[0] }}</td>
+                        <td><strong>{{ u[1] }}</strong></td>
+                        <td style="text-align: right;">
+                            <form action="/excluir_usuario/{{ u[0] }}" method="POST" style="display:inline;">
+                                <button type="submit" class="btn-acao-tabela btn-excluir">Remover</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="3" style="text-align: center; color: #94a3b8; padding: 20px;">Nenhum usuário cadastrado.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
-        
-        <div class="modal-corpo">
-            <!-- Aqui vai o seu formulário para o Flask processar depois -->
-            <form action="/salvar-usuario" method="POST">
-                <div style="margin-bottom: 15px;">
-                    <label style="font-weight: bold; font-size: 14px;">Nome do Usuário:</label><br>
-                    <input type="text" name="nome" placeholder="Ex: João Silva" required style="width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #cbd5e1; border-radius: 4px;">
-                </div>
-                
-                <div style="margin-bottom: 20px;">
-                    <label style="font-weight: bold; font-size: 14px;">Senha:</label><br>
-                    <input type="password" name="senha" required style="width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #cbd5e1; border-radius: 4px;">
-                </div>
-                
-                <button type="submit" style="width: 100%; padding: 10px; background-color: #10b981; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">
-                    SALVAR USUÁRIO
-                </button>
-            </form>
-        </div>
-        
     </div>
-</div>
-<script>
-    function abrirModal() {
-        // Muda o display de none para flex para aparecer na tela
-        document.getElementById('modalCadastro').style.display = 'flex';
-    }
 
-    function fecharModal() {
-        // Esconde o modal novamente
-        document.getElementById('modalCadastro').style.display = 'none';
-    }
-</script>
+    <!-- MODAL POP-UP DE CADASTRO -->
+    <div id="modal-cadastrar-usuario" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>👤 Cadastrar Novo Usuário</span>
+                <button type="button" class="modal-close" onclick="fecharModalUsuario()">✕</button>
+            </div>
+            <div class="modal-body">
+                <form action="/salvar_novo_usuario" method="POST">
+                    <div class="modal-group">
+                        <label>Nome do Usuário</label>
+                        <input type="text" name="nome" placeholder="Ex: João Silva" required>
+                    </div>
+                    <div class="modal-group">
+                        <label>Senha</label>
+                        <input type="password" name="senha" placeholder="Digite a senha" required>
+                    </div>
+                    <div class="modal-footer" style="margin: -20px -20px; padding: 15px 20px;">
+                        <button type="button" class="btn-cancelar" onclick="fecharModalUsuario()">Cancelar</button>
+                        <button type="submit" class="btn-salvar">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function abrirModalUsuario() {
+            document.getElementById('modal-cadastrar-usuario').style.display = 'flex';
+        }
+
+        function fecharModalUsuario() {
+            document.getElementById('modal-cadastrar-usuario').style.display = 'none';
+        }
+        function fecharSistema(){
+                window.close();
+            }
+    </script>
+
 </body>
 </html>

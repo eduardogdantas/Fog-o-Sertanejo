@@ -19,7 +19,7 @@
             overflow: hidden;
         }
 
-        /* 1. ABAS SUPERIORES */
+        /* ABAS SUPERIORES */
         .abas-container {
             background-color: #1e293b;
             display: flex;
@@ -50,7 +50,7 @@
             color: #fff;
         }
 
-        /* 2. BARRA DE FERRAMENTAS */
+        /* BARRA DE FERRAMENTAS */
         .barra-ferramentas {
             background-color: #ffffff;
             display: flex;
@@ -96,7 +96,7 @@
             color: #ef4444;
         }
 
-        /* 3. BARRA DE STATUS */
+        /* BARRA DE STATUS */
         .barra-status {
             background-color: #2c5ca4;
             color: #ffffff;
@@ -107,7 +107,7 @@
             letter-spacing: 0.5px;
         }
 
-        /* 4. CONTEÚDO PRINCIPAL (GRID DE MESAS) */
+        /* CONTEÚDO PRINCIPAL (GRID DE MESAS) */
         .container-principal {
             padding: 25px;
             height: calc(100vh - 140px);
@@ -153,7 +153,7 @@
             margin-bottom: 4px;
         }
 
-        /* 5. ESTILO DOS MODAIS (JANELAS FLUTUANTES) */
+        /* ESTILO DOS MODAIS */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -247,34 +247,19 @@
             font-weight: bold;
             cursor: pointer;
         }
-
-        @media (max-width: 1024px) {
-            .grid-mesas {
-                grid-template-columns: repeat(6, 1fr);
-            }
-        }
-        @media (max-width: 768px) {
-            .grid-mesas {
-                grid-template-columns: repeat(4, 1fr);
-            }
-        }
     </style>
 </head>
-<body style="margin: 0; background-color: #f4f6f9;">
+<body>
 
     <!-- TELA DE LOGIN -->
     <div id="login-container" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #1e293b; display: flex; justify-content: center; align-items: center; z-index: 99999;">
         <div style="background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); width: 300px; text-align: center;">
-            <h2 style="margin-bottom: 20px; color: #333; font-family: Arial, sans-serif;">Login do Sistema</h2>
-            
+            <h2 style="margin-bottom: 20px; color: #333;">Login do Sistema</h2>
             <form onsubmit="realizarLogin(event)">
                 <input type="text" id="usuario" placeholder="Usuário" style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-                
                 <input type="password" id="senha" placeholder="Senha" style="width: 100%; padding: 10px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-                
                 <button type="submit" style="width: 100%; padding: 10px; background-color: #0d9488; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">Entrar</button>
             </form>
-            
             <p id="erro-msg" style="color: red; margin-top: 10px; font-size: 14px; display: none;">Usuário ou senha incorretos!</p>
         </div>
     </div>
@@ -283,7 +268,7 @@
     <div id="app-principal" style="display: none;">
         
         <div class="abas-container">
-            <a href="/vendas" style="text-decoration: none;"><button class="aba">1 - VENDAS</button></a>
+            <a href="/vendas" style="text-decoration: none;"><button class="aba ativa">1 - VENDAS</button></a>
             <a href="/estoque" style="text-decoration: none;"><button class="aba">2 - ESTOQUE</button></a>
             <a href="/caixa" style="text-decoration: none;"><button class="aba">3 - CAIXA</button></a>
             <a href="/relatorios" style="text-decoration: none;"><button class="aba">4 - RELATÓRIOS</button></a>
@@ -307,17 +292,18 @@
                 <span class="icone">🍺</span>
                 <span class="texto">Balcão</span>
             </button>
-            <button class="btn-ferramenta">
+            <!-- BOTÃO CUPOM (COM ONCLICK) -->
+            <button class="btn-ferramenta" onclick="abrirModalCupom()">
                 <span class="icone">🖨️</span>
                 <span class="texto">Cupom</span>
+            </button>
+            <button class="btn-ferramenta" onclick="abrirModalReimprimir()">
+                <span class="icone">🔄</span>
+                <span class="texto">Reimprimir</span>
             </button>
             <button class="btn-ferramenta">
                 <span class="icone">📋</span>
                 <span class="texto">Delivery</span>
-            </button>
-            <button class="btn-ferramenta sair" onclick="sairDoSistema()">
-                <span class="icone">❌</span>
-                <span class="texto">Sair</span>
             </button>
         </div>
 
@@ -355,15 +341,16 @@
                 {% endfor %}
             </div>
         </div>
+    </div> <!-- FIM DO APP PRINCIPAL -->
 
-    </div>
+    <!-- ==================== MODAIS AQUI ==================== -->
 
-    <!-- MODAL 1: PEDIR SENHA DE ADM ANTES DE CADASTRAR -->
+    <!-- MODAL 1: PEDIR SENHA DE ADM -->
     <div id="modal-senha-adm" class="modal-overlay">
         <div class="modal-content" style="width: 350px;">
             <div class="modal-header">
                 <span>Acesso Restrito - ADM</span>
-                <button class="modal-close" onclick="fecharModalAdm()">✕</button>
+                <button type="button" class="modal-close" onclick="fecharModalAdm()">✕</button>
             </div>
             <div class="modal-body">
                 <form onsubmit="verificarSenhaAdm(event)">
@@ -376,83 +363,147 @@
                         <button type="submit" class="btn-salvar">Confirmar</button>
                     </div>
                 </form>
-                <p id="erro-adm-msg" style="color: red; margin-top: 10px; font-size: 13px; display: none; text-align: center;">Senha de ADM incorreta!</p>
+                <p id="erro-adm-msg" style="color: red; margin-top: 10px; font-size: 13px; display: none; text-align: center;">Senha incorreta!</p>
             </div>
         </div>
     </div>
 
     <!-- MODAL 2: TELA DE CADASTRAR NOVO USUÁRIO -->
     <div id="modal-cadastrar-usuario" class="modal-overlay">
-    <div class="modal-content">
-        <div class="modal-header">
-            <span>Cadastrar Novo Usuário</span>
-            <button class="modal-close" onclick="fecharModalUsuario()">✕</button>
-        </div>
-        <div class="modal-body">
-        <form id="form-novo-usuario" action="/salvar-novo-usuario" method="POST">
-    <div class="modal-group">
-        <label>Nome do Usuário</label>
-        <input type="text" id="novo-usuario-nome" name="nome" placeholder="Ex: João Silva" required>
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>Cadastrar Novo Usuário</span>
+                <button type="button" class="modal-close" onclick="fecharModalUsuario()">✕</button>
+            </div>
+            <div class="modal-body">
+                <form id="form-novo-usuario" onsubmit="enviarUsuarioJS(event)">
+                    <div class="modal-group">
+                        <label>Nome do Usuário</label>
+                        <input type="text" id="input-cad-nome" name="nome" required>
+                    </div>
+                    <div class="modal-group">
+                        <label>Senha</label>
+                        <input type="password" id="input-cad-senha" name="senha" required>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-cancelar" onclick="fecharModalUsuario()">Fechar</button>
+                        <button type="submit" class="btn-salvar">Cadastrar</button>
+                    </div>
+                </form>
+            </div>
+        </div> 
     </div>
 
-    <div class="modal-group">
-        <label>Login / Usuário</label>
-        <input type="text" id="novo-usuario-login" name="usuario" placeholder="Ex: joao.silva" required>
-    </div>
-
-    <div class="modal-group">
-        <label>Senha</label>
-        <input type="password" id="novo-usuario-senha" name="senha" placeholder="Digite a senha" required>
-    </div>
-
-    <div class="modal-footer">
-        <button type="button" class="btn-cancelar" onclick="fecharModalUsuario()">Fechar</button>
-        <button type="submit" class="btn-salvar">Cadastrar</button>
-    </div>
-</form>
-
-    <!-- JANELA FLUTUANTE (MODAL) DO BALCÃO -->
+    <!-- MODAL 3: BALCÃO -->
     <div id="modal-balcao" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
                 <span>Venda Rápida - Balcão</span>
-                <button class="modal-close" onclick="fecharModalBalcao()">✕</button>
+                <button type="button" class="modal-close" onclick="fecharModalBalcao()">✕</button>
             </div>
-            
             <div class="modal-body">
-                <form id="form-balcao" onsubmit="salvarVendaBalcao(event)">
+                <!-- O form envia os dados, abre o cupom em nova aba e recarrega a tela atual -->
+                <form action="/venda-balcao" method="POST" target="_blank" onsubmit="setTimeout(function(){ window.location.reload(); }, 500);">
+                    
                     <div class="modal-group">
                         <label>Nome do Produto</label>
-                        <input type="text" id="balcao-produto" placeholder="Ex: Coca-Cola" required>
+                        <!-- Mantive o seletor do estoque para o caixa não precisar digitar! -->
+                        <select id="balcao-produto" name="produto" required>
+                            <option value="" disabled selected>Selecione o item do estoque...</option>
+                            {% for item in estoque_itens %}
+                                <option value="{{ item[1] }}">{{ item[1] }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
-
+                    
                     <div class="modal-group">
                         <label>Quantidade</label>
-                        <input type="number" id="balcao-quantidade" value="1" min="1" required>
+                        <input type="number" id="balcao-quantidade" name="quantidade" value="1" min="1" required>
                     </div>
-
+                    
                     <div class="modal-group">
                         <label>Forma de Pagamento</label>
-                        <select id="balcao-pagamento" required>
-                            <option value="">Selecione...</option>
+                        <select id="balcao-pagamento" name="forma_pagamento" required>
+                            <option value="" disabled selected>Selecione...</option>
                             <option value="Dinheiro">Dinheiro</option>
                             <option value="Pix">Pix</option>
                             <option value="Cartao Credito">Cartão de Crédito</option>
                             <option value="Cartao Debito">Cartão de Débito</option>
                         </select>
                     </div>
-
+                    
                     <div class="modal-footer">
                         <button type="button" class="btn-cancelar" onclick="fecharModalBalcao()">Cancelar</button>
-                        <button type="submit" class="btn-salvar">Salvar Venda</button>
+                        <button type="submit" class="btn-salvar">Imprimir</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
+    <!-- MODAL 4: CUPOM (Completamente Desbugado) -->
+    <div id="modal-cupom" class="modal-overlay">
+        <div class="modal-content" style="width: 350px;">
+            <div class="modal-header">
+                <span>🖨️ Imprimir Cupom</span>
+                <button type="button" class="modal-close" onclick="fecharModalCupom()">✕</button>
+            </div>
+            <div class="modal-body">
+                <form action="/imprimir_cupom" method="GET" target="_blank">
+                    <div class="modal-group">
+                        <label>Selecione a Mesa</label>
+                        <select name="numero_mesa" required>
+                            <option value="" disabled selected>Escolha uma mesa...</option>
+                            <!-- Lista TODAS as mesas -->
+                            {% for mesa in mesas %}
+                                <option value="{{ mesa[0] }}">Mesa {{ mesa[0] }} - {{ mesa[1] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-cancelar" onclick="fecharModalCupom()">Cancelar</button>
+                        <button type="submit" class="btn-salvar" onclick="fecharModalCupom()">Imprimir</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+<!-- MODAL 5: REIMPRIMIR VENDA FECHADA -->
+<div id="modal-reimprimir" class="modal-overlay">
+    <div class="modal-content" style="width: 400px;">
+        <div class="modal-header">
+            <span>🔄 Reimprimir Comanda</span>
+            <button type="button" class="modal-close" onclick="fecharModalReimprimir()">✕</button>
+        </div>
+        <div class="modal-body">
+            <form action="/reimprimir_fechada" method="GET" target="_blank">
+                <div class="modal-group">
+                    <label>Selecione a Venda/Mesa Fechada</label>
+                    <select name="id_venda" required>
+                        <option value="" disabled selected>Buscando últimas vendas...</option>
+                        <!-- O Python vai preencher isso com as vendas fechadas hoje -->
+                        {% for venda in vendas_fechadas %}
+                            <option value="{{ venda.id }}">Mesa {{ venda.mesa }} - R$ {{ "%.2f"|format(venda.total) }} ({{ venda.hora }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancelar" onclick="fecharModalReimprimir()">Cancelar</button>
+                    <button type="submit" class="btn-salvar" onclick="fecharModalReimprimir()">Imprimir 2ª Via</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
     <!-- SCRIPTS -->
     <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            if (localStorage.getItem("usuarioLogado") === "true") {
+                document.getElementById("login-container").style.display = "none";
+                document.getElementById("app-principal").style.display = "block";
+            }
+        });
+
         function mostrarView(tipo) {
             const viewMesas = document.getElementById('view-mesas');
             const viewPracas = document.getElementById('view-pracas');
@@ -469,63 +520,14 @@
             }
         }
 
-        // Funções do Modal de Balcão
-        function abrirModalBalcao() {
-            document.getElementById('modal-balcao').style.display = 'flex';
-        }
-
-        function fecharModalBalcao() {
-            document.getElementById('modal-balcao').style.display = 'none';
-            document.getElementById('form-balcao').reset();
-        }
-
-        function salvarVendaBalcao(event) {
-            event.preventDefault();
-            fecharModalBalcao();
-        }
-
-        // Funções de Segurança e Cadastro de Usuário (ADM)
-        function abrirVerificacaoAdm() {
-            document.getElementById('senha-adm-input').value = "";
-            document.getElementById('erro-adm-msg').style.display = "none";
-            document.getElementById('modal-senha-adm').style.display = 'flex';
-        }
-
-        function fecharModalAdm() {
-            document.getElementById('modal-senha-adm').style.display = 'none';
-        }
-
-        function verificarSenhaAdm(event) {
-            event.preventDefault();
-            const senhaDigitada = document.getElementById('senha-adm-input').value;
-            
-            // Senha de Administrador configurada
-            const senhaAdmCorreta = "9999"; 
-
-            if (senhaDigitada === senhaAdmCorreta) {
-                fecharModalAdm();
-                document.getElementById('modal-cadastrar-usuario').style.display = 'flex';
-            } else {
-                document.getElementById('erro-adm-msg').style.display = "block";
-            }
-        }
-
-        function fecharModalUsuario() {
-            document.getElementById('modal-cadastrar-usuario').style.display = 'none';
-            document.getElementById('form-novo-usuario').reset();
-        }
-
-        // Funções de Login e Logout do Sistema
+        /* Funções de Login */
         function realizarLogin(event) {
             event.preventDefault();
-
             const usuarioInput = document.getElementById("usuario").value;
             const senhaInput = document.getElementById("senha").value;
 
-            const usuarioCorreto = "admin";
-            const senhaCorreta = "1234";
-
-            if (usuarioInput === usuarioCorreto && senhaInput === senhaCorreta) {
+            if (usuarioInput === "admin" && senhaInput === "1234") {
+                localStorage.setItem("usuarioLogado", "true");
                 document.getElementById("login-container").style.display = "none";
                 document.getElementById("app-principal").style.display = "block";
             } else {
@@ -534,34 +536,88 @@
         }
 
         function sairDoSistema() {
+            localStorage.removeItem("usuarioLogado");
             document.getElementById("usuario").value = "";
             document.getElementById("senha").value = "";
             document.getElementById("erro-msg").style.display = "none";
             document.getElementById("app-principal").style.display = "none";
             document.getElementById("login-container").style.display = "flex";
         }
-        function enviarCadastro(event) {
-    event.preventDefault();
-    
-    const formData = new FormData(document.getElementById('form-novo-usuario'));
 
-    fetch('/salvar-novo-usuario', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.sucesso) {
-            alert('Usuário cadastrado com sucesso!');
-            fecharModalUsuario();
-        } else {
-            alert('Erro ao cadastrar usuário. O login já pode existir.');
+        /* Modais */
+        function abrirModalBalcao() {
+            document.getElementById('modal-balcao').style.display = 'flex';
         }
-    })
-    .catch(error => {
-        console.error('Erro:', error);
-        alert('Erro de conexão com o servidor.');
-    });
+        function fecharModalBalcao() {
+            document.getElementById('modal-balcao').style.display = 'none';
+            document.getElementById('form-balcao').reset();
+        }
+        function salvarVendaBalcao(event) {
+            event.preventDefault();
+            fecharModalBalcao();
+        }
+
+        function abrirModalCupom() {
+            document.getElementById('modal-cupom').style.display = 'flex';
+        }
+        function fecharModalCupom() {
+            document.getElementById('modal-cupom').style.display = 'none';
+        }
+
+        function abrirVerificacaoAdm() {
+            document.getElementById('senha-adm-input').value = "";
+            document.getElementById('erro-adm-msg').style.display = "none";
+            document.getElementById('modal-senha-adm').style.display = 'flex';
+        }
+        function fecharModalAdm() {
+            document.getElementById('modal-senha-adm').style.display = 'none';
+        }
+        function verificarSenhaAdm(event) {
+            event.preventDefault();
+            if (document.getElementById('senha-adm-input').value === "9999") {
+                fecharModalAdm();
+                window.location.href = "/usuario"; // Vai direto para a página de cadastro oficial
+            } else {
+                document.getElementById('erro-adm-msg').style.display = "block";
+            }
+        }
+        function fecharModalUsuario() {
+            document.getElementById('modal-cadastrar-usuario').style.display = 'none';
+            document.getElementById('form-novo-usuario').reset();
+        }
+        function abrirModalReimprimir() {
+    document.getElementById('modal-reimprimir').style.display = 'flex';
+}
+
+        function fecharModalReimprimir() {
+    document.getElementById('modal-reimprimir').style.display = 'none';
+}
+async function enviarUsuarioJS(event) {
+    event.preventDefault(); // Impede o navegador de tentar abrir uma página errada
+    
+    const nome = document.getElementById('input-cad-nome').value;
+    const senha = document.getElementById('input-cad-senha').value;
+
+    const dados = new URLSearchParams();
+    dados.append('nome', nome);
+    dados.append('senha', senha);
+
+    try {
+        const resposta = await fetch('/salvar_novo_usuario', {
+            method: 'POST',
+            body: dados
+        });
+
+        if (resposta.ok) {
+            alert('Usuário cadastrado com sucesso!');
+            window.location.reload(); // Recarrega a página principal com os novos dados
+        } else {
+            alert('Erro ao salvar no servidor.');
+        }
+    } catch (erro) {
+        console.error('Erro:', erro);
+        alert('Erro de conexão.');
+    }
 }
     </script>
 </body>
