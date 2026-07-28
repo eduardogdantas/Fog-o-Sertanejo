@@ -23,32 +23,53 @@
         <div class="dashboard-header">
         </div>
 
+        <!-- Sub-abas para alternar entre Diário e Mensal -->
+        <!-- Sub-abas para alternar entre Mensal, Semanal e Diário -->
         <div class="sub-abas">
-    <a href="/relatorios?filtro=mes" style="text-decoration: none;">
-        <button class="sub-aba {% if filtro_atual != 'tempo_real' %}ativa{% endif %}">
-            📅 Dados do mês
-        </button>
-    </a>
-    <a href="/relatorios?filtro=tempo_real" style="text-decoration: none;">
-        <button class="sub-aba {% if filtro_atual == 'tempo_real' %}ativa{% endif %}">
-            ⚡ Em tempo real
-        </button>
-    </a>
-</div>
+            <a href="/relatorios?filtro=mes" style="text-decoration: none;">
+                <button class="sub-aba {% if filtro_atual == 'mes' %}ativa{% endif %}">
+                    📅 Dados do mês
+                </button>
+            </a>
+            <a href="/relatorios?filtro=semana" style="text-decoration: none;">
+                <button class="sub-aba {% if filtro_atual == 'semana' %}ativa{% endif %}">
+                    📆 Dados da semana
+                </button>
+            </a>
+            <a href="/relatorios?filtro=dia" style="text-decoration: none;">
+                <button class="sub-aba {% if filtro_atual == 'dia' %}ativa{% endif %}">
+                    ⚡ Em tempo real / Diário
+                </button>
+            </a>
+        </div>
 
-<!-- Seletor de Mês Interativo -->
-{% if filtro_atual != 'tempo_real' %}
-<div class="seletor-mes" style="padding: 10px; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 20px; text-align: center;">
-    <form method="GET" action="/relatorios" style="display: inline-flex; align-items: center; gap: 10px;">
-        <input type="hidden" name="filtro" value="mes">
-        <label for="mes_ano" style="font-size: 14px; font-weight: 600; color: #475569;">Escolha o mês:</label>
-        <!-- O input type="month" abre o seletor nativo de mês/ano do navegador -->
-        <input type="month" id="mes_ano" name="mes_ano" value="{{ mes_selecionado }}" 
-               onchange="this.form.submit()" 
-               style="padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 14px; outline: none; cursor: pointer;">
-    </form>
-</div>
-{% endif %}
+        <!-- Seletor de Data/Semana/Mês Interativo -->
+        <div class="seletor-mes" style="padding: 10px; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 20px; text-align: center;">
+            <form method="GET" action="/relatorios" style="display: inline-flex; align-items: center; gap: 10px;">
+                <!-- Mantém o filtro atual na URL -->
+                <input type="hidden" name="filtro" value="{{ filtro_atual }}">
+                
+                {% if filtro_atual == 'mes' %}
+                    <label for="mes_ano" style="font-size: 14px; font-weight: 600; color: #475569;">Escolha o mês:</label>
+                    <input type="month" id="mes_ano" name="mes_ano" value="{{ mes_selecionado }}" 
+                           onchange="this.form.submit()" 
+                           style="padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 14px; outline: none; cursor: pointer;">
+                           
+                {% elif filtro_atual == 'semana' %}
+                    <label for="semana_escolhida" style="font-size: 14px; font-weight: 600; color: #475569;">Escolha a semana:</label>
+                    <input type="week" id="semana_escolhida" name="semana_escolhida" value="{{ semana_selecionada }}" 
+                           onchange="this.form.submit()" 
+                           style="padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 14px; outline: none; cursor: pointer;">
+                           
+                {% else %}
+                    <label for="data_escolhida" style="font-size: 14px; font-weight: 600; color: #475569;">Escolha o dia:</label>
+                    <input type="date" id="data_escolhida" name="data_escolhida" value="{{ data_selecionada }}" 
+                           onchange="this.form.submit()" 
+                           style="padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 14px; outline: none; cursor: pointer;">
+                {% endif %}
+            </form>
+        </div>
+
         <div class="dashboard-cards">
             
             <div class="card-metrica card-azul">
@@ -71,9 +92,9 @@
                 <div class="sub-valor">{{ prato_destaque_qtd }} unidades vendidas</div>
             </div>
             
-        </div> <!-- ESSE É O DIV QUE FALTAVA PARA FECHAR OS CARDS! -->
+        </div> <!-- FIM DOS CARDS -->
 
-        <!-- Filtro -->
+        <!-- Filtro Secundário -->
         <div class="barra-ferramentas" style="border-radius: 8px; margin-top: 25px; align-items: flex-end;">
             <div style="display: flex; flex-direction: column; gap: 5px; flex: 1;">
                 <label style="font-size: 11px; font-weight: bold; color: #475569; text-transform: uppercase;">Tipo de Relatório</label>
@@ -82,11 +103,11 @@
                 </select>
             </div>
             <button onclick="window.location.reload();" style="background-color: #10b981; color: white; border: none; padding: 11px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px;">
-                Filtrar Dados
+                Atualizar Dados
             </button>
         </div>
 
-        <!-- Tabela preenchida automaticamente pelas vendas das mesas -->
+        <!-- Tabela preenchida automaticamente pelas vendas -->
         <div style="background: white; border-radius: 8px; overflow: hidden; margin-top: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
             <table>
                 <thead>
@@ -109,7 +130,7 @@
                         {% endfor %}
                     {% else %}
                         <tr>
-                            <td colspan="4" style="text-align: center; color: #64748b; padding: 25px;">Nenhuma venda registrada nas mesas ainda.</td>
+                            <td colspan="4" style="text-align: center; color: #64748b; padding: 25px;">Nenhuma venda registrada neste período.</td>
                         </tr>
                     {% endif %}
                 </tbody>

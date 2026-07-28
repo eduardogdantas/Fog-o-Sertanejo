@@ -1,10 +1,10 @@
 from datetime import datetime
-from flask import Flask, redirect, render_template, request, url_for, jsonify
+from flask import Flask, redirect, render_template, request, url_for, jsonify, session
 import sqlite3
 import re
 
 app = Flask(__name__)
-
+app.secret_key = "chave_super_secreta_restaurante"
 def conectar_db():
   return sqlite3.connect("restaurante.db")
 
@@ -31,6 +31,12 @@ def criar_tabelas():
             senha TEXT
         )
     """)
+    try:
+        cursor.execute("ALTER TABLE usuarios ADD COLUMN permissao TEXT DEFAULT 'comum'")
+        cursor.execute("UPDATE usuarios SET permissao = 'admin' WHERE nome = 'admin'")
+    except sqlite3.OperationalError:
+        pass
+
     conexao.commit()
     conexao.close()
 
@@ -39,6 +45,9 @@ criar_tabelas()
 
 @app.route("/")
 def home():
+    if not session.get("logado"):
+        return redirect(url_for("login"))
+
     conexao = sqlite3.connect("restaurante.db")
     cursor = conexao.cursor()
 
@@ -447,14 +456,49 @@ def reimprimir_fechada():
 
 @app.route('/relatorios')
 def relatorios():
-    filtro_tipo = request.args.get('filtro', 'mes')
+    filtro_tipo = request.args.get('filtro', 'dia') 
+    
+    # Datas atuais do sistema
+    data_atual_padrao = datetime.now().strftime('%Y-%m-%d')
     mes_atual_padrao = datetime.now().strftime('%Y-%m')
+    # Pega o Ano e a Semana atual no formato ISO (ex: 2026-W31)
+    semana_atual_padrao = datetime.now().strftime('%G-W%V')
+    
+    # Captura o que o usuário escolheu
+    data_selecionada = request.args.get('data_escolhida', data_atual_padrao)
     mes_selecionado = request.args.get('mes_ano', mes_atual_padrao)
+    semana_selecionada = request.args.get('semana_escolhida', semana_atual_padrao)
     
     conexao = sqlite3.connect("restaurante.db")
     cursor = conexao.cursor()
     
-    cursor.execute("SELECT id, descricao, tipo, valor FROM financeiro WHERE tipo = 'Receita' ORDER BY id DESC")
+    if filtro_tipo == 'mes':
+        termo_busca = f"{mes_selecionado}%"
+        cursor.execute("SELECT id, descricao, tipo, valor FROM financeiro WHERE tipo = 'Receita' AND data LIKE ? ORDER BY id DESC", (termo_busca,))
+        
+    elif filtro_tipo == 'semana':
+        # Transforma '2026-W31' em um intervalo de datas (Segunda a Domingo)
+        try:
+            ano_str, semana_str = semana_selecionada.split('-W')
+            # %G (Ano ISO), %V (Semana ISO), %u (Dia da semana 1=Segunda, 7=Domingo)
+            inicio_semana = datetime.strptime(f'{ano_str}-W{semana_str}-1', "%G-W%V-%u").strftime('%Y-%m-%d 00:00:00')
+            fim_semana = datetime.strptime(f'{ano_str}-W{semana_str}-7', "%G-W%V-%u").strftime('%Y-%m-%d 23:59:59')
+        except ValueError:
+            inicio_semana = "1900-01-01 00:00:00"
+            fim_semana = "2100-01-01 23:59:59"
+            
+        # Busca usando 'Maior/Igual a Segunda' e 'Menor/Igual a Domingo'
+        cursor.execute("""
+            SELECT id, descricao, tipo, valor 
+            FROM financeiro 
+            WHERE tipo = 'Receita' AND data >= ? AND data <= ? 
+            ORDER BY id DESC
+        """, (inicio_semana, fim_semana))
+        
+    else: # dia
+        termo_busca = f"{data_selecionada}%"
+        cursor.execute("SELECT id, descricao, tipo, valor FROM financeiro WHERE tipo = 'Receita' AND data LIKE ? ORDER BY id DESC", (termo_busca,))
+        
     dados = cursor.fetchall()
     conexao.close()
     
@@ -506,9 +550,10 @@ def relatorios():
         prato_destaque_qtd=prato_destaque_qtd,
         resultados=resultados,
         filtro_atual=filtro_tipo,
-        mes_selecionado=mes_selecionado
+        mes_selecionado=mes_selecionado,
+        data_selecionada=data_selecionada,
+        semana_selecionada=semana_selecionada # Retornando a variável nova pro HTML
     )
-
 
 @app.route('/vendas')
 def vendas():
@@ -591,15 +636,11 @@ def venda_balcao():
         conexao.close()
         return f"<h1>ERRO!</h1> <p>O produto '<b>{produto}</b>' não existe no estoque.</p>"
     
-
-# ==========================================
-# ROTAS DE CONFIGURAÇÃO E USUÁRIOS (ÚNICA)
-# ==========================================
 @app.route("/configuracao")
 def configuracao():
     conexao = conectar_db()
     cursor = conexao.cursor()
-    cursor.execute("SELECT id, nome FROM usuarios")
+    cursor.execute("SELECT id, nome, permissao FROM usuarios")
     lista_usuarios = cursor.fetchall()
     conexao.close()
     return render_template("configuracao.html", usuarios=lista_usuarios)
@@ -607,34 +648,65 @@ def configuracao():
 
 @app.route('/salvar_novo_usuario', methods=['POST'])
 def salvar_novo_usuario():
+    if session.get("usuario_nome") != "admin" and session.get("permissao") != "admin":
+        return "Erro: Apenas o administrador pode adicionar usuários.", 403
+
     nome = request.form.get('nome')
     senha = request.form.get('senha')
+    permissao = request.form.get('permissao', 'comum') # Pega do HTML
 
     conexao = conectar_db()
     cursor = conexao.cursor()
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS usuarios (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nome TEXT,
-            senha TEXT
-        )
-    """)
-    cursor.execute("INSERT INTO usuarios (nome, senha) VALUES (?, ?)", (nome, senha))
+    cursor.execute("INSERT INTO usuarios (nome, senha, permissao) VALUES (?, ?, ?)", (nome, senha, permissao))
     conexao.commit()
     conexao.close()
         
     return redirect(url_for('configuracao'))
 
-
 @app.route('/excluir_usuario/<int:id_usuario>', methods=['POST'])
 def excluir_usuario(id_usuario):
+    if session.get("usuario_nome") != "admin" and session.get("permissao") != "admin":
+        return "Erro: Apenas o administrador pode excluir usuários.", 403
+
     conexao = conectar_db()
     cursor = conexao.cursor()
     cursor.execute("DELETE FROM usuarios WHERE id = ?", (id_usuario,))
     conexao.commit()
     conexao.close()
     return redirect(url_for('configuracao'))
+@app.route('/alternar_permissao/<int:id_usuario>', methods=['POST'])
+def alternar_permissao(id_usuario):
+    # Nova rota: O Admin pode dar ou tirar poderes de outros usuários
+    if session.get("usuario_nome") != "admin" and session.get("permissao") != "admin":
+        return "Erro: Sem permissão.", 403
 
+    nova_permissao = request.form.get('permissao')
+    
+    conexao = conectar_db()
+    cursor = conexao.cursor()
+    cursor.execute("UPDATE usuarios SET permissao = ? WHERE id = ?", (nova_permissao, id_usuario))
+    conexao.commit()
+    conexao.close()
+    return redirect(url_for('configuracao'))
+def criar_usuario_admin():
+    conexao = conectar_db()
+    cursor = conexao.cursor()
+    
+    # Verifica se já existe algum usuário 'adm'
+    cursor.execute("SELECT * FROM usuarios WHERE nome = 'admin'")
+    admin_existe = cursor.fetchone()
+    
+    # Se não existir, ele cria um automaticamente com a senha '1234'
+    if not admin_existe:
+        cursor.execute("INSERT INTO usuarios (nome, senha) VALUES ('admin', '1234')")
+        conexao.commit()
+        print("Usuário administrador criado com sucesso! Login: admin / Senha: 1234")
+        
+    conexao.close()
+
+# Executa as funções ao iniciar o servidor
+criar_tabelas()
+criar_usuario_admin() # <-- Adicione esta linha
 
 @app.route('/imprimir_cupom')
 def imprimir_cupom():
@@ -676,9 +748,37 @@ def imprimir_cupom():
         total=total_venda,
         data_hora=datetime.now().strftime("%d/%m/%Y %H:%M")
     )
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        usuario = request.form.get("usuario")
+        senha = request.form.get("senha")
+        
+        conexao = conectar_db()
+        cursor = conexao.cursor()
+        cursor.execute("SELECT * FROM usuarios WHERE nome = ? AND senha = ?", (usuario, senha))
+        user = cursor.fetchone()
+        conexao.close()
+        
+        if user:
+            session["logado"] = True
+            session["usuario_nome"] = usuario
+            
+            
+            try:
+                session["permissao"] = user[3]
+            except IndexError:
+                session["permissao"] = "admin" if usuario == "admin" else "comum"
+                
+            return redirect(url_for("home"))
+        else:
+            return render_template("login.html", erro="Usuário ou senha incorretos!")
+            
+    return render_template("login.html")
 
 @app.route("/sair")
 def sair():
-    return render_template("sair.html")
+    session.clear() 
+    return redirect(url_for("login"))
 if __name__ == "__main__":
   app.run(debug=True)

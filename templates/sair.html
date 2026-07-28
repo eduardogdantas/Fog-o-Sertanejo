@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Saindo do Sistema...</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f1f5f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+        .mensagem-box {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h1 { color: #334155; }
+        p { color: #64748b; }
+    </style>
+</head>
+<body>
+
+    <div class="mensagem-box">
+        <h1>Sistema Encerrado</h1>
+        <p>Obrigado por usar o sistema! O caixa foi fechado.</p>
+        <p style="font-size: 12px;">Você já pode fechar esta janela.</p>
+    </div>
+
+    <script>
+        // Tenta fechar a aba automaticamente após 2 segundos
+        setTimeout(function() {
+            window.close();
+        }, 2000);
+    </script>
+</body>
+</html>
