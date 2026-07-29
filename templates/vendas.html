@@ -107,9 +107,9 @@
             letter-spacing: 0.5px;
         }
 
-        /* CONTEÚDO PRINCIPAL (GRID DE MESAS) */
+        /* CONTEÚDO PRINCIPAL */
         .container-principal {
-            padding: 25px;
+            padding: 20px;
             height: calc(100vh - 140px);
             overflow-y: auto;
         }
@@ -117,41 +117,129 @@
         .grid-mesas {
             display: grid;
             grid-template-columns: repeat(8, 1fr);
-            gap: 12px;
+            gap: 30px;
             max-width: 1400px;
-            margin: 0 auto;
+            margin: 0 auto 20px auto;
+        }
+
+        /* GRID DO SALÃO COM ESPAÇAMENTO ADEQUADO PARA AS CADEIRAS NÃO COLIDIREM */
+        .grid-setor {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 30px 25px;
+            padding: 25px;
+            background: #f8fafc;
+            border-radius: 12px;
             margin-bottom: 20px;
         }
 
-        .card-mesa {
-            background-color: #10b981;
-            color: white;
-            border: none;
-            border-radius: 12px;
-            padding: 20px 10px;
+        .setor-restaurante {
+            margin-bottom: 25px;
+        }
+
+        .setor-titulo {
+            font-size: 16px;
+            font-weight: bold;
+            color: #1e293b;
+            margin-bottom: 12px;
+        }
+
+        .link-mesa {
+            text-decoration: none;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 10px 0;
+        }
+
+        /* ========================================================
+            ESTILO DA MESA E DAS 6 CADEIRAS ALINHADAS
+            ======================================================== */
+        .card-mesa {
+            position: relative;
+            display: flex;
             align-items: center;
             justify-content: center;
+            flex-direction: column;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
             cursor: pointer;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: all 0.2s ease;
+            width: 75px;
+            height: 95px;
+            border-radius: 6px;
         }
 
         .card-mesa:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
         }
 
-        .card-mesa.ocupada {
-            background-color: #f43f5e;
+        /* MESA LIVRE / DISPONÍVEL (Verde moderno idêntico ao seu print) */
+        .card-mesa.disponivel, .card-mesa.livre { 
+            background-color: #10b981 !important; 
+            color: #fff !important;
+        }
+
+        /* MESA OCUPADA (Laranja) */
+        .card-mesa.ocupada { 
+            background-color: #f97316 !important; 
+            color: #fff !important;
         }
 
         .card-mesa .num-mesa {
-            font-size: 16px;
+            font-size: 14px;
             font-weight: bold;
-            margin-bottom: 4px;
+            z-index: 2;
         }
+
+        .card-mesa .status-info {
+            font-size: 7px;
+            font-weight: 600;
+            text-transform: uppercase;
+            z-index: 2;
+            margin-top: 2px;
+            opacity: 0.9;
+        }
+
+        /* POSICIONAMENTO DAS 6 CADEIRAS AO REDOR DA MESA */
+        .card-mesa::before,
+        .card-mesa::after,
+        .card-mesa .cadeira-sup-dir,
+        .card-mesa .cadeira-inf-dir,
+        .card-mesa .cadeira-ponta-topo,
+        .card-mesa .cadeira-ponta-base {
+            content: '';
+            position: absolute;
+            border-radius: 3px;
+            z-index: 1;
+        }
+
+        /* Cor padrão das cadeiras para mesas livres (Verde escuro/compatível) */
+        .card-mesa.disponivel::before, .card-mesa.disponivel::after,
+        .card-mesa.disponivel .cadeira-sup-dir, .card-mesa.disponivel .cadeira-inf-dir,
+        .card-mesa.disponivel .cadeira-ponta-topo, .card-mesa.disponivel .cadeira-ponta-base {
+            background-color: #047857 !important;
+        }
+
+        /* Cor padrão das cadeiras para mesas ocupadas (Laranja escuro) */
+        .card-mesa.ocupada::before, .card-mesa.ocupada::after,
+        .card-mesa.ocupada .cadeira-sup-dir, .card-mesa.ocupada .cadeira-inf-dir,
+        .card-mesa.ocupada .cadeira-ponta-topo, .card-mesa.ocupada .cadeira-ponta-base {
+            background-color: #c2410c !important;
+        }
+
+        /* 1. Esquerda Superior */
+        .card-mesa::before { left: -10px; top: 10px; width: 8px; height: 25px; }
+        /* 2. Esquerda Inferior */
+        .card-mesa::after { left: -10px; bottom: 10px; width: 8px; height: 25px; }
+        /* 3. Direita Superior */
+        .card-mesa .cadeira-sup-dir { right: -10px; top: 10px; width: 8px; height: 25px; }
+        /* 4. Direita Inferior */
+        .card-mesa .cadeira-inf-dir { right: -10px; bottom: 10px; width: 8px; height: 25px; }
+        /* 5. Ponta Superior */
+        .card-mesa .cadeira-ponta-topo { top: -10px; left: 20px; width: 35px; height: 8px; }
+        /* 6. Ponta Inferior */
+        .card-mesa .cadeira-ponta-base { bottom: -10px; left: 20px; width: 35px; height: 8px; }
 
         /* ESTILO DOS MODAIS */
         .modal-overlay {
@@ -164,7 +252,7 @@
             background-color: rgba(0, 0, 0, 0.6);
             justify-content: center;
             align-items: center;
-            z-index: 999999;
+            z-index: 99999;
         }
 
         .modal-content {
@@ -256,8 +344,8 @@
         <div style="background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); width: 300px; text-align: center;">
             <h2 style="margin-bottom: 20px; color: #333;">Login do Sistema</h2>
             <form onsubmit="realizarLogin(event)">
-                <input type="text" id="usuario" placeholder="Usuário" style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-                <input type="password" id="senha" placeholder="Senha" style="width: 100%; padding: 10px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                <input type="text" id="usuario" placeholder="Usuário" style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;" required>
+                <input type="password" id="senha" placeholder="Senha" style="width: 100%; padding: 10px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;" required>
                 <button type="submit" style="width: 100%; padding: 10px; background-color: #0d9488; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">Entrar</button>
             </form>
             <p id="erro-msg" style="color: red; margin-top: 10px; font-size: 14px; display: none;">Usuário ou senha incorretos!</p>
@@ -272,7 +360,7 @@
             <a href="/estoque" style="text-decoration: none;"><button class="aba">2 - ESTOQUE</button></a>
             <a href="/caixa" style="text-decoration: none;"><button class="aba">3 - CAIXA</button></a>
             <a href="/relatorios" style="text-decoration: none;"><button class="aba">4 - RELATÓRIOS</button></a>
-            <a href="/configuracao" style="text-decoration: none;"><button class="aba">5 - CONFIGURAÇÃO</button></a>
+            <a href="/configuracao" style="text-decoration: none;"><button class="aba">5 - CONFIGURAÇÃO DO SISTEMA</button></a>
         </div>
 
         <div class="barra-ferramentas">
@@ -292,7 +380,6 @@
                 <span class="icone">🍺</span>
                 <span class="texto">Balcão</span>
             </button>
-            <!-- BOTÃO CUPOM (COM ONCLICK) -->
             <button class="btn-ferramenta" onclick="abrirModalCupom()">
                 <span class="icone">🖨️</span>
                 <span class="texto">Cupom</span>
@@ -305,7 +392,10 @@
                 <span class="icone">📋</span>
                 <span class="texto">Delivery</span>
             </button>
-
+            <button class="btn-ferramenta sair" onclick="sairDoSistema()">
+                <span class="icone">🚪</span>
+                <span class="texto">Sair</span>
+            </button>
         </div>
 
         <div class="barra-status" id="barra-status-texto">
@@ -315,14 +405,26 @@
         <div class="container-principal">
             <!-- Container Mesas -->
             <div id="view-mesas" style="display: block;">
-                <div class="grid-mesas">
-                    {% for mesa in mesas %}
-                        <a href="{{ url_for('ver_mesa', numero_mesa=mesa[0]) }}" style="text-decoration: none;">
-                            <div class="card-mesa {% if mesa[1]|lower == 'ocupada' %}ocupada{% endif %}">
-                                <span class="num-mesa">Mesa {{ mesa[0] }}</span>
-                            </div>
-                        </a>
-                    {% endfor %}
+                <div class="salao-virtual">
+                    
+                    <!-- SALÃO PRINCIPAL -->
+                    <div class="setor-restaurante">
+                        <div class="grid-setor">
+                            {% for mesa in mesas %}
+                                <a href="{{ url_for('ver_mesa', numero_mesa=mesa[0]) }}" class="link-mesa">
+                                    <div class="card-mesa {% if mesa[1]|lower == 'ocupada' %}ocupada{% else %}disponivel{% endif %}">
+                                        <div class="cadeira-sup-dir"></div>
+                                        <div class="cadeira-inf-dir"></div>
+                                        <div class="cadeira-ponta-topo"></div>
+                                        <div class="cadeira-ponta-base"></div>
+                                        <span class="num-mesa">Mesa {{ mesa[0] }}</span>
+                                        <span class="status-info">{{ mesa[1] }}</span>
+                                    </div>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
@@ -332,9 +434,14 @@
                     <h3 style="margin: 20px 0 10px 0; color: #1e293b;">Praça {{ praca_id }}</h3>
                     <div class="grid-mesas">
                         {% for mesa in mesas_da_praca %}
-                            <a href="{{ url_for('ver_mesa', numero_mesa=mesa[0]) }}" style="text-decoration: none;">
-                                <div class="card-mesa {% if mesa[1]|lower == 'ocupada' %}ocupada{% endif %}">
+                            <a href="{{ url_for('ver_mesa', numero_mesa=mesa[0]) }}" class="link-mesa">
+                                <div class="card-mesa {% if mesa[1]|lower == 'ocupada' %}ocupada{% else %}disponivel{% endif %}">
+                                    <div class="cadeira-sup-dir"></div>
+                                    <div class="cadeira-inf-dir"></div>
+                                    <div class="cadeira-ponta-topo"></div>
+                                    <div class="cadeira-ponta-base"></div>
                                     <span class="num-mesa">Mesa {{ mesa[0] }}</span>
+                                    <span class="status-info">{{ mesa[1] }}</span>
                                 </div>
                             </a>
                         {% endfor %}
@@ -342,60 +449,9 @@
                 {% endfor %}
             </div>
         </div>
-    </div> <!-- FIM DO APP PRINCIPAL -->
-
-    <!-- ==================== MODAIS AQUI ==================== -->
-
-    <!-- MODAL 1: PEDIR SENHA DE ADM -->
-    <div id="modal-senha-adm" class="modal-overlay">
-        <div class="modal-content" style="width: 350px;">
-            <div class="modal-header">
-                <span>Acesso Restrito - ADM</span>
-                <button type="button" class="modal-close" onclick="fecharModalAdm()">✕</button>
-            </div>
-            <div class="modal-body">
-                <form onsubmit="verificarSenhaAdm(event)">
-                    <div class="modal-group">
-                        <label>Senha do Administrador</label>
-                        <input type="password" id="senha-adm-input" placeholder="Digite a senha ADM" required>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn-cancelar" onclick="fecharModalAdm()">Cancelar</button>
-                        <button type="submit" class="btn-salvar">Confirmar</button>
-                    </div>
-                </form>
-                <p id="erro-adm-msg" style="color: red; margin-top: 10px; font-size: 13px; display: none; text-align: center;">Senha incorreta!</p>
-            </div>
-        </div>
     </div>
 
-    <!-- MODAL 2: TELA DE CADASTRAR NOVO USUÁRIO -->
-    <div id="modal-cadastrar-usuario" class="modal-overlay">
-        <div class="modal-content">
-            <div class="modal-header">
-                <span>Cadastrar Novo Usuário</span>
-                <button type="button" class="modal-close" onclick="fecharModalUsuario()">✕</button>
-            </div>
-            <div class="modal-body">
-                <form id="form-novo-usuario" onsubmit="enviarUsuarioJS(event)">
-                    <div class="modal-group">
-                        <label>Nome do Usuário</label>
-                        <input type="text" id="input-cad-nome" name="nome" required>
-                    </div>
-                    <div class="modal-group">
-                        <label>Senha</label>
-                        <input type="password" id="input-cad-senha" name="senha" required>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn-cancelar" onclick="fecharModalUsuario()">Fechar</button>
-                        <button type="submit" class="btn-salvar">Cadastrar</button>
-                    </div>
-                </form>
-            </div>
-        </div> 
-    </div>
-
-    <!-- MODAL 3: BALCÃO -->
+    <!-- ==================== MODAIS ==================== -->
     <div id="modal-balcao" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
@@ -403,12 +459,9 @@
                 <button type="button" class="modal-close" onclick="fecharModalBalcao()">✕</button>
             </div>
             <div class="modal-body">
-                <!-- O form envia os dados, abre o cupom em nova aba e recarrega a tela atual -->
-                <form action="/venda-balcao" method="POST" target="_blank" onsubmit="setTimeout(function(){ window.location.reload(); }, 500);">
-                    
+                <form id="form-balcao" action="/venda-balcao" method="POST" target="_blank" onsubmit="setTimeout(function(){ window.location.reload(); }, 500);">
                     <div class="modal-group">
                         <label>Nome do Produto</label>
-                        <!-- Seletor do estoque para o caixa não precisar digitar -->
                         <select id="balcao-produto" name="produto" required>
                             <option value="" disabled selected>Selecione o item do estoque...</option>
                             {% for item in estoque_itens %}
@@ -416,12 +469,10 @@
                             {% endfor %}
                         </select>
                     </div>
-                    
                     <div class="modal-group">
                         <label>Quantidade</label>
                         <input type="number" id="balcao-quantidade" name="quantidade" value="1" min="1" required>
                     </div>
-                    
                     <div class="modal-group">
                         <label>Forma de Pagamento</label>
                         <select id="balcao-pagamento" name="forma_pagamento" required>
@@ -432,7 +483,6 @@
                             <option value="Cartao Debito">Cartão de Débito</option>
                         </select>
                     </div>
-                    
                     <div class="modal-footer">
                         <button type="button" class="btn-cancelar" onclick="fecharModalBalcao()">Cancelar</button>
                         <button type="submit" class="btn-salvar">Imprimir</button>
@@ -442,7 +492,6 @@
         </div>
     </div>
 
-    <!-- MODAL 4: CUPOM (Completamente Desbugado) -->
     <div id="modal-cupom" class="modal-overlay">
         <div class="modal-content" style="width: 350px;">
             <div class="modal-header">
@@ -455,7 +504,6 @@
                         <label>Selecione a Mesa</label>
                         <select name="numero_mesa" required>
                             <option value="" disabled selected>Escolha uma mesa...</option>
-                            <!-- Lista TODAS as mesas -->
                             {% for mesa in mesas %}
                                 <option value="{{ mesa[0] }}">Mesa {{ mesa[0] }} - {{ mesa[1] }}</option>
                             {% endfor %}
@@ -469,33 +517,33 @@
             </div>
         </div>
     </div>
-<!-- MODAL 5: REIMPRIMIR VENDA FECHADA -->
-<div id="modal-reimprimir" class="modal-overlay">
-    <div class="modal-content" style="width: 400px;">
-        <div class="modal-header">
-            <span>🔄 Reimprimir Comanda</span>
-            <button type="button" class="modal-close" onclick="fecharModalReimprimir()">✕</button>
-        </div>
-        <div class="modal-body">
-            <form action="/reimprimir_fechada" method="GET" target="_blank">
-                <div class="modal-group">
-                    <label>Selecione a Venda/Mesa Fechada</label>
-                    <select name="id_venda" required>
-                        <option value="" disabled selected>Buscando últimas vendas...</option>
-                        <!-- O Python vai preencher isso com as vendas fechadas hoje -->
-                        {% for venda in vendas_fechadas %}
-                            <option value="{{ venda.id }}">Mesa {{ venda.mesa }} - R$ {{ "%.2f"|format(venda.total) }} ({{ venda.hora }})</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn-cancelar" onclick="fecharModalReimprimir()">Cancelar</button>
-                    <button type="submit" class="btn-salvar" onclick="fecharModalReimprimir()">Imprimir 2ª Via</button>
-                </div>
-            </form>
+
+    <div id="modal-reimprimir" class="modal-overlay">
+        <div class="modal-content" style="width: 400px;">
+            <div class="modal-header">
+                <span>🔄 Reimprimir Comanda</span>
+                <button type="button" class="modal-close" onclick="fecharModalReimprimir()">✕</button>
+            </div>
+            <div class="modal-body">
+                <form action="/reimprimir_fechada" method="GET" target="_blank">
+                    <div class="modal-group">
+                        <label>Selecione a Venda/Mesa Fechada</label>
+                        <select name="id_venda" required>
+                            <option value="" disabled selected>Buscando últimas vendas...</option>
+                            {% for venda in vendas_fechadas %}
+                                <option value="{{ venda.id }}">Mesa {{ venda.mesa }} - R$ {{ "%.2f"|format(venda.total) }} ({{ venda.hora }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-cancelar" onclick="fecharModalReimprimir()">Cancelar</button>
+                        <button type="submit" class="btn-salvar" onclick="fecharModalReimprimir()">Imprimir 2ª Via</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
+
     <!-- SCRIPTS -->
     <script>
         document.addEventListener("DOMContentLoaded", function() {
@@ -521,7 +569,6 @@
             }
         }
 
-        /* Funções de Login */
         function realizarLogin(event) {
             event.preventDefault();
             const usuarioInput = document.getElementById("usuario").value;
@@ -545,17 +592,12 @@
             document.getElementById("login-container").style.display = "flex";
         }
 
-        /* Modais */
         function abrirModalBalcao() {
             document.getElementById('modal-balcao').style.display = 'flex';
         }
         function fecharModalBalcao() {
             document.getElementById('modal-balcao').style.display = 'none';
             document.getElementById('form-balcao').reset();
-        }
-        function salvarVendaBalcao(event) {
-            event.preventDefault();
-            fecharModalBalcao();
         }
 
         function abrirModalCupom() {
@@ -565,61 +607,12 @@
             document.getElementById('modal-cupom').style.display = 'none';
         }
 
-        function abrirVerificacaoAdm() {
-            document.getElementById('senha-adm-input').value = "";
-            document.getElementById('erro-adm-msg').style.display = "none";
-            document.getElementById('modal-senha-adm').style.display = 'flex';
-        }
-        function fecharModalAdm() {
-            document.getElementById('modal-senha-adm').style.display = 'none';
-        }
-        function verificarSenhaAdm(event) {
-            event.preventDefault();
-            if (document.getElementById('senha-adm-input').value === "9999") {
-                fecharModalAdm();
-                document.getElementById('modal-cadastrar-usuario').style.display = 'flex';
-            } else {
-                document.getElementById('erro-adm-msg').style.display = "block";
-            }
-        }
-        function fecharModalUsuario() {
-            document.getElementById('modal-cadastrar-usuario').style.display = 'none';
-            document.getElementById('form-novo-usuario').reset();
-        }
         function abrirModalReimprimir() {
-    document.getElementById('modal-reimprimir').style.display = 'flex';
-}
-
-        function fecharModalReimprimir() {
-    document.getElementById('modal-reimprimir').style.display = 'none';
-}
-async function enviarUsuarioJS(event) {
-    event.preventDefault(); // Impede o navegador de tentar abrir uma página errada
-    
-    const nome = document.getElementById('input-cad-nome').value;
-    const senha = document.getElementById('input-cad-senha').value;
-
-    const dados = new URLSearchParams();
-    dados.append('nome', nome);
-    dados.append('senha', senha);
-
-    try {
-        const resposta = await fetch('/salvar_novo_usuario', {
-            method: 'POST',
-            body: dados
-        });
-
-        if (resposta.ok) {
-            alert('Usuário cadastrado com sucesso!');
-            window.location.reload(); // Recarrega a página principal com os novos dados
-        } else {
-            alert('Erro ao salvar no servidor.');
+            document.getElementById('modal-reimprimir').style.display = 'flex';
         }
-    } catch (erro) {
-        console.error('Erro:', erro);
-        alert('Erro de conexão.');
-    }
-}
+        function fecharModalReimprimir() {
+            document.getElementById('modal-reimprimir').style.display = 'none';
+        }
     </script>
 </body>
 </html>

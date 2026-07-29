@@ -416,19 +416,32 @@ def registrar_venda_financeiro(mesa_numero):
 
 @app.route("/liberar_mesa/<int:numero_mesa>")
 def liberar_mesa(numero_mesa):
-  registrar_venda_financeiro(numero_mesa)
+    origem = request.args.get("origem")
 
-  conexao = conectar_db()
-  cursor = conexao.cursor()
-  cursor.execute("DELETE FROM pedidos WHERE mesa_numero = ?", (numero_mesa,))
-  cursor.execute(
-      "UPDATE mesas SET status = 'Disponivel' WHERE numero = ?", (numero_mesa,)
-  )
-  conexao.commit()
-  conexao.close()
+    registrar_venda_financeiro(numero_mesa)
 
-  return redirect(url_for("home"))
+    conexao = conectar_db()
+    cursor = conexao.cursor()
+    cursor.execute("DELETE FROM pedidos WHERE mesa_numero = ?", (numero_mesa,))
+    cursor.execute(
+        "UPDATE mesas SET status = 'Disponivel' WHERE numero = ?",
+        (numero_mesa,),
+    )
+    conexao.commit()
+    conexao.close()
 
+    # 1. Se passou o parâmetro 'origem' explicitamente na URL
+    if origem == "vendas":
+        return redirect(url_for("vendas"))
+    elif origem == "home":
+        return redirect(url_for("home"))
+
+    # 2. Se não passou parâmetro, volta para a página exata de onde o usuário veio
+    if request.referrer:
+        return redirect(request.referrer)
+
+    # 3. Fallback padrão
+    return redirect(url_for("home"))
 
 @app.route('/reimprimir_fechada')
 def reimprimir_fechada():
