@@ -12,19 +12,28 @@
             font-family: 'Segoe UI', Arial, sans-serif;
         }
 
-        body {
+        html, body {
+            height: 100%;
             background-color: #f4f6f9;
             color: #333;
-            height: 100vh;
             overflow: hidden;
         }
 
-        /* ABAS SUPERIORES */
+        #app-principal {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* 1. ABAS SUPERIORES */
         .abas-container {
             background-color: #1e293b;
             display: flex;
             padding: 5px 10px 0 10px;
             gap: 4px;
+            align-items: flex-end;
+            flex-shrink: 0;
         }
 
         .aba {
@@ -37,7 +46,8 @@
             border-top-left-radius: 8px;
             border-top-right-radius: 8px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
         }
 
         .aba.ativa {
@@ -45,20 +55,15 @@
             color: #1e293b;
         }
 
-        .aba:hover:not(.ativa) {
-            background-color: #475569;
-            color: #fff;
-        }
-
-        /* BARRA DE FERRAMENTAS */
+        /* 2. BARRA DE FERRAMENTAS */
         .barra-ferramentas {
             background-color: #ffffff;
             display: flex;
             gap: 15px;
-            padding: 12px 20px;
+            padding: 10px 20px;
             border-bottom: 1px solid #e2e8f0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
             align-items: center;
+            flex-shrink: 0;
         }
 
         .btn-ferramenta {
@@ -70,33 +75,20 @@
             border: none;
             cursor: pointer;
             width: 85px;
-            padding: 8px;
+            padding: 6px;
             border-radius: 10px;
             transition: background 0.2s;
         }
 
-        .btn-ferramenta:hover {
+        .btn-ferramenta:hover, .btn-ferramenta.ativo {
             background-color: #f1f5f9;
         }
 
-        .btn-ferramenta .icone {
-            font-size: 22px;
-            margin-bottom: 4px;
-        }
+        .btn-ferramenta .icone { font-size: 20px; margin-bottom: 2px; }
+        .btn-ferramenta .texto { font-size: 11px; font-weight: 700; color: #475569; text-transform: uppercase; }
+        .btn-ferramenta.sair .texto { color: #ef4444; }
 
-        .btn-ferramenta .texto {
-            font-size: 11px;
-            font-weight: 700;
-            color: #475569;
-            text-align: center;
-            text-transform: uppercase;
-        }
-
-        .btn-ferramenta.sair .texto {
-            color: #ef4444;
-        }
-
-        /* BARRA DE STATUS */
+        /* 3. BARRA DE STATUS */
         .barra-status {
             background-color: #2c5ca4;
             color: #ffffff;
@@ -104,44 +96,72 @@
             padding: 8px;
             font-size: 14px;
             font-weight: bold;
-            letter-spacing: 0.5px;
+            flex-shrink: 0;
         }
 
-        /* CONTEÚDO PRINCIPAL */
+        /* 4. CONTAINER PRINCIPAL COM ROLAGEM */
         .container-principal {
+            flex: 1;
             padding: 20px;
-            height: calc(100vh - 140px);
-            overflow-y: auto;
+            overflow-y: auto !important;
+            box-sizing: border-box;
         }
 
-        .grid-mesas {
-            display: grid;
-            grid-template-columns: repeat(8, 1fr);
-            gap: 30px;
-            max-width: 1400px;
-            margin: 0 auto 20px auto;
+        /* GRID VIRTUAL TRANSPARENTE DA TELA DE MESAS */
+        .grid-salao-virtual {
+            display: grid !important;
+            grid-template-columns: repeat(10, 1fr) !important;
+            gap: 40px 15px !important;
+            padding: 15px 0 30px 0;
+            background: transparent !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            width: 100%;
         }
 
-        /* GRID DO SALÃO COM ESPAÇAMENTO ADEQUADO PARA AS CADEIRAS NÃO COLIDIREM */
-        .grid-setor {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-            gap: 30px 25px;
-            padding: 25px;
-            background: #f8fafc;
+        /* LAYOUT DAS PRAÇAS EM GRID 2 COLUNAS LADO A LADO */
+        #view-pracas {
+            display: none;
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 20px !important;
+            width: 100%;
+        }
+
+        /* JANELA QUADRADA DA PRAÇA */
+        .painel-praca {
+            background-color: #ffffff;
             border-radius: 12px;
-            margin-bottom: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+            width: 100%;
+            box-sizing: border-box;
         }
 
-        .setor-restaurante {
-            margin-bottom: 25px;
+        .cabecalho-praca {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #f1f5f9;
         }
 
-        .setor-titulo {
+        .titulo-praca {
             font-size: 16px;
-            font-weight: bold;
+            font-weight: 700;
             color: #1e293b;
-            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .grid-praca-interna {
+            display: grid !important;
+            grid-template-columns: repeat(5, 1fr) !important;
+            gap: 30px 10px !important;
+            padding: 5px 0;
+            width: 100%;
         }
 
         .link-mesa {
@@ -149,12 +169,9 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            margin: 10px 0;
         }
 
-        /* ========================================================
-            ESTILO DA MESA E DAS 6 CADEIRAS ALINHADAS
-            ======================================================== */
+        /* CARD DA MESA VIRTUAL */
         .card-mesa {
             position: relative;
             display: flex;
@@ -165,93 +182,66 @@
             cursor: pointer;
             transition: all 0.2s ease;
             width: 75px;
-            height: 95px;
+            height: 85px;
             border-radius: 6px;
         }
 
         .card-mesa:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.12);
         }
 
-        /* MESA LIVRE / DISPONÍVEL (Verde moderno idêntico ao seu print) */
-        .card-mesa.disponivel, .card-mesa.livre { 
-            background-color: #10b981 !important; 
-            color: #fff !important;
-        }
+        /* CORES DAS MESAS */
+        .card-mesa.disponivel, .card-mesa.livre { background-color: #10b981 !important; color: #fff !important; }
+        .card-mesa.ocupada { background-color: #f97316 !important; color: #fff !important; }
 
-        /* MESA OCUPADA (Laranja) */
-        .card-mesa.ocupada { 
-            background-color: #f97316 !important; 
-            color: #fff !important;
-        }
+        .card-mesa .num-mesa { font-size: 13px; font-weight: bold; z-index: 2; }
+        .card-mesa .status-info { font-size: 8px; font-weight: 700; text-transform: uppercase; z-index: 2; margin-top: 3px; opacity: 0.95; }
 
-        .card-mesa .num-mesa {
-            font-size: 14px;
-            font-weight: bold;
-            z-index: 2;
-        }
-
-        .card-mesa .status-info {
-            font-size: 7px;
-            font-weight: 600;
-            text-transform: uppercase;
-            z-index: 2;
-            margin-top: 2px;
-            opacity: 0.9;
-        }
-
-        /* POSICIONAMENTO DAS 6 CADEIRAS AO REDOR DA MESA */
-        .card-mesa::before,
-        .card-mesa::after,
-        .card-mesa .cadeira-sup-dir,
-        .card-mesa .cadeira-inf-dir,
-        .card-mesa .cadeira-ponta-topo,
-        .card-mesa .cadeira-ponta-base {
+        /* DESENHO DAS CADEIRAS AO REDOR DA MESA */
+        .card-mesa::before, .card-mesa::after,
+        .card-mesa .cadeira-sup-dir, .card-mesa .cadeira-inf-dir,
+        .card-mesa .cadeira-ponta-topo, .card-mesa .cadeira-ponta-base {
             content: '';
             position: absolute;
             border-radius: 3px;
             z-index: 1;
         }
 
-        /* Cor padrão das cadeiras para mesas livres (Verde escuro/compatível) */
         .card-mesa.disponivel::before, .card-mesa.disponivel::after,
         .card-mesa.disponivel .cadeira-sup-dir, .card-mesa.disponivel .cadeira-inf-dir,
-        .card-mesa.disponivel .cadeira-ponta-topo, .card-mesa.disponivel .cadeira-ponta-base {
+        .card-mesa.disponivel .cadeira-ponta-topo, .card-mesa.disponivel .cadeira-ponta-base,
+        .card-mesa.livre::before, .card-mesa.livre::after,
+        .card-mesa.livre .cadeira-sup-dir, .card-mesa.livre .cadeira-inf-dir,
+        .card-mesa.livre .cadeira-ponta-topo, .card-mesa.livre .cadeira-ponta-base {
             background-color: #047857 !important;
         }
 
-        /* Cor padrão das cadeiras para mesas ocupadas (Laranja escuro) */
         .card-mesa.ocupada::before, .card-mesa.ocupada::after,
         .card-mesa.ocupada .cadeira-sup-dir, .card-mesa.ocupada .cadeira-inf-dir,
         .card-mesa.ocupada .cadeira-ponta-topo, .card-mesa.ocupada .cadeira-ponta-base {
             background-color: #c2410c !important;
         }
 
-        /* 1. Esquerda Superior */
-        .card-mesa::before { left: -10px; top: 10px; width: 8px; height: 25px; }
-        /* 2. Esquerda Inferior */
-        .card-mesa::after { left: -10px; bottom: 10px; width: 8px; height: 25px; }
-        /* 3. Direita Superior */
-        .card-mesa .cadeira-sup-dir { right: -10px; top: 10px; width: 8px; height: 25px; }
-        /* 4. Direita Inferior */
-        .card-mesa .cadeira-inf-dir { right: -10px; bottom: 10px; width: 8px; height: 25px; }
-        /* 5. Ponta Superior */
-        .card-mesa .cadeira-ponta-topo { top: -10px; left: 20px; width: 35px; height: 8px; }
-        /* 6. Ponta Inferior */
-        .card-mesa .cadeira-ponta-base { bottom: -10px; left: 20px; width: 35px; height: 8px; }
+        .card-mesa::before { left: -9px; top: 10px; width: 7px; height: 22px; }
+        .card-mesa::after { left: -9px; bottom: 10px; width: 7px; height: 22px; }
+        .card-mesa .cadeira-sup-dir { right: -9px; top: 10px; width: 7px; height: 22px; }
+        .card-mesa .cadeira-inf-dir { right: -9px; bottom: 10px; width: 7px; height: 22px; }
+        .card-mesa .cadeira-ponta-topo { top: -9px; left: 18px; width: 38px; height: 7px; }
+        .card-mesa .cadeira-ponta-base { bottom: -9px; left: 18px; width: 38px; height: 7px; }
 
-        /* ESTILO DOS MODAIS */
+        @media (max-width: 1200px) {
+            #view-pracas { grid-template-columns: 1fr !important; }
+        }
+
+        /* MODAIS DO SISTEMA */
         .modal-overlay {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
             background-color: rgba(0, 0, 0, 0.6);
-            justify-content: center;
-            align-items: center;
+            justify-content: center; align-items: center;
             z-index: 99999;
         }
 
@@ -274,67 +264,42 @@
             font-size: 16px;
         }
 
-        .modal-close {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 18px;
-            cursor: pointer;
-        }
+        .modal-close { background: none; border: none; color: white; font-size: 18px; cursor: pointer; }
+        .modal-body { padding: 20px; }
+        .modal-group { margin-bottom: 15px; }
+        .modal-group label { display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 5px; }
+        .modal-group input, .modal-group select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 14px; box-sizing: border-box; }
+        .modal-footer { padding: 15px 20px; background-color: #f8fafc; display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid #e2e8f0; }
+        .btn-cancelar { background-color: #64748b; color: white; border: none; padding: 10px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        .btn-salvar { background-color: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; }
 
-        .modal-body {
-            padding: 20px;
-        }
-
-        .modal-group {
+        /* ESTILOS DOS CARDS DE COMANDAS */
+        .card-comanda-item {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-left: 5px solid #f97316;
+            border-radius: 8px;
+            padding: 15px;
             margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
         }
 
-        .modal-group label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            color: #475569;
-            margin-bottom: 5px;
-        }
-
-        .modal-group input, .modal-group select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #cbd5e1;
-            border-radius: 4px;
-            font-size: 14px;
-            box-sizing: border-box;
-        }
-
-        .modal-footer {
-            padding: 15px 20px;
-            background-color: #f8fafc;
+        .comanda-topo {
             display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            border-top: 1px solid #e2e8f0;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+            font-weight: bold;
         }
 
-        .btn-cancelar {
-            background-color: #64748b;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            font-weight: bold;
-            cursor: pointer;
-        }
+        .comanda-topo .titulo { color: #1e293b; font-size: 15px; }
+        .comanda-topo .total { color: #10b981; font-size: 16px; }
 
-        .btn-salvar {
-            background-color: #10b981;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            font-weight: bold;
-            cursor: pointer;
-        }
+        .tabela-itens-comanda { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .tabela-itens-comanda td { padding: 6px 0; border-bottom: 1px dashed #f1f5f9; color: #475569; }
+        .tabela-itens-comanda td.qtd { font-weight: bold; width: 30px; }
     </style>
 </head>
 <body>
@@ -344,8 +309,8 @@
         <div style="background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); width: 300px; text-align: center;">
             <h2 style="margin-bottom: 20px; color: #333;">Login do Sistema</h2>
             <form onsubmit="realizarLogin(event)">
-                <input type="text" id="usuario" placeholder="Usuário" style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;" required>
-                <input type="password" id="senha" placeholder="Senha" style="width: 100%; padding: 10px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;" required>
+                <input type="text" id="usuario" placeholder="Usuário" style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px;" required>
+                <input type="password" id="senha" placeholder="Senha" style="width: 100%; padding: 10px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 4px;" required>
                 <button type="submit" style="width: 100%; padding: 10px; background-color: #0d9488; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">Entrar</button>
             </form>
             <p id="erro-msg" style="color: red; margin-top: 10px; font-size: 14px; display: none;">Usuário ou senha incorretos!</p>
@@ -364,15 +329,15 @@
         </div>
 
         <div class="barra-ferramentas">
-            <button class="btn-ferramenta" onclick="mostrarView('mesas')">
+            <button class="btn-ferramenta ativo" id="btn-mesas" onclick="mostrarView('mesas')">
                 <span class="icone">🪑</span>
                 <span class="texto">Mesas</span>
             </button>
-            <button class="btn-ferramenta" onclick="mostrarView('pracas')">
+            <button class="btn-ferramenta" id="btn-pracas" onclick="mostrarView('pracas')">
                 <span class="icone">🌳</span>
                 <span class="texto">Praça</span>
             </button>
-            <button class="btn-ferramenta">
+            <button class="btn-ferramenta" id="btn-comandas" onclick="abrirModalComandas()">
                 <span class="icone">📑</span>
                 <span class="texto">Comandas</span>
             </button>
@@ -392,26 +357,45 @@
                 <span class="icone">📋</span>
                 <span class="texto">Delivery</span>
             </button>
-            <button class="btn-ferramenta sair" onclick="sairDoSistema()">
-                <span class="icone">🚪</span>
-                <span class="texto">Sair</span>
-            </button>
         </div>
 
         <div class="barra-status" id="barra-status-texto">
             MAPA DE ATENDIMENTO DO SALÃO - 40 MESAS
         </div>
 
+        <!-- CONTAINER PRINCIPAL -->
         <div class="container-principal">
-            <!-- Container Mesas -->
+            
+            <!-- VISÃO GERAL DE MESAS -->
             <div id="view-mesas" style="display: block;">
-                <div class="salao-virtual">
-                    
-                    <!-- SALÃO PRINCIPAL -->
-                    <div class="setor-restaurante">
-                        <div class="grid-setor">
-                            {% for mesa in mesas %}
-                                <a href="{{ url_for('ver_mesa', numero_mesa=mesa[0]) }}" class="link-mesa">
+                <div class="grid-salao-virtual">
+                    {% for mesa in mesas %}
+                        <a href="/mesa/{{ mesa[0] }}" class="link-mesa">
+                            <div class="card-mesa {% if mesa[1]|lower == 'ocupada' %}ocupada{% else %}disponivel{% endif %}">
+                                <div class="cadeira-sup-dir"></div>
+                                <div class="cadeira-inf-dir"></div>
+                                <div class="cadeira-ponta-topo"></div>
+                                <div class="cadeira-ponta-base"></div>
+                                <span class="num-mesa">Mesa {{ mesa[0] }}</span>
+                                <span class="status-info">{{ mesa[1] }}</span>
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- VISÃO POR PRAÇAS -->
+            <div id="view-pracas">
+                {% for praca_id, mesas_da_praca in por_praca.items() %}
+                    <div class="painel-praca">
+                        
+                        <div class="cabecalho-praca">
+                            <span class="titulo-praca">🌳 Praça {{ praca_id }}</span>
+                        </div>
+
+                        <div class="grid-praca-interna">
+                            {% for mesa in mesas_da_praca %}
+                                <a href="/mesa/{{ mesa[0] }}" class="link-mesa">
                                     <div class="card-mesa {% if mesa[1]|lower == 'ocupada' %}ocupada{% else %}disponivel{% endif %}">
                                         <div class="cadeira-sup-dir"></div>
                                         <div class="cadeira-inf-dir"></div>
@@ -423,35 +407,55 @@
                                 </a>
                             {% endfor %}
                         </div>
-                    </div>
 
-                </div>
-            </div>
-
-            <!-- Container PRAÇAS -->
-            <div id="view-pracas" style="display: none;">
-                {% for praca_id, mesas_da_praca in por_praca.items() %}
-                    <h3 style="margin: 20px 0 10px 0; color: #1e293b;">Praça {{ praca_id }}</h3>
-                    <div class="grid-mesas">
-                        {% for mesa in mesas_da_praca %}
-                            <a href="{{ url_for('ver_mesa', numero_mesa=mesa[0]) }}" class="link-mesa">
-                                <div class="card-mesa {% if mesa[1]|lower == 'ocupada' %}ocupada{% else %}disponivel{% endif %}">
-                                    <div class="cadeira-sup-dir"></div>
-                                    <div class="cadeira-inf-dir"></div>
-                                    <div class="cadeira-ponta-topo"></div>
-                                    <div class="cadeira-ponta-base"></div>
-                                    <span class="num-mesa">Mesa {{ mesa[0] }}</span>
-                                    <span class="status-info">{{ mesa[1] }}</span>
-                                </div>
-                            </a>
-                        {% endfor %}
                     </div>
                 {% endfor %}
+            </div>
+
+        </div>
+    </div>
+
+    <!-- MODAL DE COMANDAS / PEDIDOS ATIVOS -->
+    <div id="modal-comandas" class="modal-overlay">
+        <div class="modal-content" style="width: 600px; max-width: 90vw;">
+            <div class="modal-header">
+                <span>📑 Comandas Abertas / Pedidos Ativos</span>
+                <button type="button" class="modal-close" onclick="fecharModalComandas()">✕</button>
+            </div>
+            <div class="modal-body" style="max-height: 65vh; overflow-y: auto;">
+                <div id="lista-comandas-conteudo">
+                    <p style="text-align: center; color: #64748b; padding: 20px;">Buscando comandas ativas...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancelar" onclick="fecharModalComandas()">Fechar</button>
             </div>
         </div>
     </div>
 
-    <!-- ==================== MODAIS ==================== -->
+    <!-- MODAL SIMPLES DE PRODUTOS DA MESA -->
+    <div id="modal-detalhes-mesa" class="modal-overlay" style="z-index: 100000;">
+        <div class="modal-content" style="width: 400px; max-width: 90vw;">
+            <div class="modal-header">
+                <span id="detalhe-mesa-titulo">Mesa --</span>
+                <button type="button" class="modal-close" onclick="fecharModalDetalhesMesa()">✕</button>
+            </div>
+            <div class="modal-body">
+                <h4 style="font-size: 13px; color: #64748b; margin-bottom: 12px; text-transform: uppercase;">Produtos Adicionados:</h4>
+                <div id="detalhe-mesa-itens" style="max-height: 250px; overflow-y: auto;">
+                    <p style="text-align: center; color: #94a3b8; padding: 10px;">Carregando pedidos...</p>
+                </div>
+            </div>
+            <div class="modal-footer" style="justify-content: space-between;">
+                <a id="btn-imprimir-modal-detalhes" href="#" target="_blank" style="padding: 8px 16px; background: #10b981; color: white; text-decoration: none; border-radius: 4px; font-size: 13px; font-weight: bold; display: inline-flex; align-items: center; gap: 6px;">
+                    🖨️ Imprimir
+                </a>
+                <button type="button" class="btn-cancelar" onclick="fecharModalDetalhesMesa()">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAIS DO SISTEMA -->
     <div id="modal-balcao" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
@@ -493,82 +497,322 @@
     </div>
 
     <div id="modal-cupom" class="modal-overlay">
-        <div class="modal-content" style="width: 350px;">
-            <div class="modal-header">
-                <span>🖨️ Imprimir Cupom</span>
-                <button type="button" class="modal-close" onclick="fecharModalCupom()">✕</button>
-            </div>
-            <div class="modal-body">
-                <form action="/imprimir_cupom" method="GET" target="_blank">
-                    <div class="modal-group">
-                        <label>Selecione a Mesa</label>
-                        <select name="numero_mesa" required>
-                            <option value="" disabled selected>Escolha uma mesa...</option>
-                            {% for mesa in mesas %}
-                                <option value="{{ mesa[0] }}">Mesa {{ mesa[0] }} - {{ mesa[1] }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn-cancelar" onclick="fecharModalCupom()">Cancelar</button>
-                        <button type="submit" class="btn-salvar" onclick="fecharModalCupom()">Imprimir</button>
-                    </div>
-                </form>
-            </div>
+    <div class="modal-content" style="width: 380px;">
+        <div class="modal-header">
+            <span>🖨️ Imprimir Cupom</span>
+            <button type="button" class="modal-close" onclick="fecharModalCupom()">✕</button>
+        </div>
+        <div class="modal-body">
+            <form action="/imprimir_cupom" method="GET" target="_blank">
+                
+                <!-- DIGITAR O NÚMERO DA MESA -->
+                <div class="modal-group">
+                    <label>Digite o Número da Mesa:</label>
+                    <input type="number" id="input-numero-mesa-cupom" placeholder="Ex: 1" min="1" oninput="sincronizarDigitacaoMesa(this.value)" style="font-size: 16px; font-weight: bold; text-align: center; color: #1e293b;">
+                </div>
+
+                <p style="text-align: center; color: #94a3b8; font-size: 11px; margin-bottom: 10px;">— OU SELECIONE DA LISTA —</p>
+
+                <!-- LISTA SELEÇÃO DE MESA -->
+                <div class="modal-group">
+                    <select id="select-mesa-cupom" name="numero_mesa" onchange="sincronizarSelectMesa(this.value)" required>
+                        <option value="" disabled selected>Escolha uma mesa...</option>
+                        {% for mesa in mesas %}
+                            <option value="{{ mesa[0] }}">Mesa {{ mesa[0] }} - {{ mesa[1] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancelar" onclick="fecharModalCupom()">Cancelar</button>
+                    <button type="submit" class="btn-salvar" onclick="fecharModalCupom()">Imprimir</button>
+                </div>
+            </form>
         </div>
     </div>
+</div>
 
-    <div id="modal-reimprimir" class="modal-overlay">
-        <div class="modal-content" style="width: 400px;">
-            <div class="modal-header">
-                <span>🔄 Reimprimir Comanda</span>
-                <button type="button" class="modal-close" onclick="fecharModalReimprimir()">✕</button>
-            </div>
-            <div class="modal-body">
-                <form action="/reimprimir_fechada" method="GET" target="_blank">
-                    <div class="modal-group">
-                        <label>Selecione a Venda/Mesa Fechada</label>
-                        <select name="id_venda" required>
-                            <option value="" disabled selected>Buscando últimas vendas...</option>
-                            {% for venda in vendas_fechadas %}
-                                <option value="{{ venda.id }}">Mesa {{ venda.mesa }} - R$ {{ "%.2f"|format(venda.total) }} ({{ venda.hora }})</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn-cancelar" onclick="fecharModalReimprimir()">Cancelar</button>
-                        <button type="submit" class="btn-salvar" onclick="fecharModalReimprimir()">Imprimir 2ª Via</button>
-                    </div>
-                </form>
-            </div>
+    <!-- MODAL REIMPRIMIR COM FILTRO POR DATA -->
+<div id="modal-reimprimir" class="modal-overlay">
+    <div class="modal-content" style="width: 420px;">
+        <div class="modal-header">
+            <span>🔄 Reimprimir Comanda / 2ª Via</span>
+            <button type="button" class="modal-close" onclick="fecharModalReimprimir()">✕</button>
+        </div>
+        <div class="modal-body">
+            <form action="/reimprimir_fechada" method="GET" target="_blank">
+                <!-- CAMPOS DE SELEÇÃO DE DATA -->
+                <div class="modal-group">
+                    <label>1. Selecione a Data:</label>
+                    <input type="date" id="filtro-data-reimprimir" onchange="carregarCuponsPorData()" style="cursor: pointer;">
+                </div>
+
+                <!-- LISTA DE CUPONS DA DATA SELECIONADA -->
+                <div class="modal-group">
+                    <label>2. Escolha o Cupom Fechado:</label>
+                    <select id="select-cupons-historico" name="id_venda" required>
+                        <option value="" disabled selected>Selecione uma data primeiro...</option>
+                    </select>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancelar" onclick="fecharModalReimprimir()">Cancelar</button>
+                    <button type="submit" class="btn-salvar" onclick="fecharModalReimprimir()">Imprimir 2ª Via</button>
+                </div>
+            </form>
         </div>
     </div>
+</div>
 
-    <!-- SCRIPTS -->
+    <!-- SCRIPTS DE NAVEGAÇÃO E LÓGICA -->
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             if (localStorage.getItem("usuarioLogado") === "true") {
                 document.getElementById("login-container").style.display = "none";
-                document.getElementById("app-principal").style.display = "block";
+                document.getElementById("app-principal").style.display = "flex";
             }
         });
 
         function mostrarView(tipo) {
             const viewMesas = document.getElementById('view-mesas');
             const viewPracas = document.getElementById('view-pracas');
+            const btnMesas = document.getElementById('btn-mesas');
+            const btnPracas = document.getElementById('btn-pracas');
             const barraStatus = document.getElementById('barra-status-texto');
 
             if (tipo === 'mesas') {
                 viewMesas.style.display = 'block';
                 viewPracas.style.display = 'none';
+                btnMesas.classList.add('ativo');
+                btnPracas.classList.remove('ativo');
                 if (barraStatus) barraStatus.innerText = "MAPA DE ATENDIMENTO DO SALÃO - 40 MESAS";
             } else if (tipo === 'pracas') {
                 viewMesas.style.display = 'none';
-                viewPracas.style.display = 'block';
+                viewPracas.style.display = 'grid';
+                btnPracas.classList.add('ativo');
+                btnMesas.classList.remove('ativo');
                 if (barraStatus) barraStatus.innerText = "MAPA DE ATENDIMENTO - PRAÇA DE ALIMENTAÇÃO";
             }
         }
 
+        /* GERENCIAMENTO DO MODAL DE COMANDAS */
+        function abrirModalComandas() {
+            document.getElementById('modal-comandas').style.display = 'flex';
+            atualizarComandasAtivas();
+        }
+
+        function fecharModalComandas() {
+            document.getElementById('modal-comandas').style.display = 'none';
+        }
+
+        function atualizarComandasAtivas() {
+            const container = document.getElementById('lista-comandas-conteudo');
+
+            fetch('/api/comandas-ativas')
+                .then(response => {
+                    if (!response.ok) throw new Error("Erro na requisição");
+                    return response.json();
+                })
+                .then(data => {
+                    if (!data.comandas || data.comandas.length === 0) {
+                        varrerMesasOcupadasDoDOM(container);
+                    } else {
+                        renderizarComandas(data.comandas, container);
+                    }
+                })
+                .catch(() => {
+                    varrerMesasOcupadasDoDOM(container);
+                });
+        }
+
+        /* ABRIR JANELA FLUTUANTE SIMPLES E CONFIGURAR BOTÃO DE IMPRESSÃO */
+        function verDetalhesMesaModal(numeroMesa) {
+            document.getElementById('detalhe-mesa-titulo').innerText = `Mesa ${numeroMesa}`;
+            
+            const btnImprimir = document.getElementById('btn-imprimir-modal-detalhes');
+            if (btnImprimir) {
+                btnImprimir.href = `/imprimir_cupom?numero_mesa=${numeroMesa}`;
+            }
+
+            document.getElementById('modal-detalhes-mesa').style.display = 'flex';
+            
+            const containerItens = document.getElementById('detalhe-mesa-itens');
+            containerItens.innerHTML = '<p style="text-align: center; color: #94a3b8; padding: 10px;">Buscando consumo...</p>';
+
+            fetch('/api/comandas-ativas')
+                .then(res => res.json())
+                .then(data => {
+                    const comanda = data.comandas.find(c => c.numero_mesa == numeroMesa);
+                    
+                    if (comanda && comanda.itens && comanda.itens.length > 0) {
+                        let html = '<table class="tabela-itens-comanda"><tbody>';
+                        
+                        comanda.itens.forEach(item => {
+                            html += `
+                                <tr>
+                                    <td class="qtd" style="padding: 8px 0;">${item.quantidade}x</td>
+                                    <td style="padding: 8px 0; font-weight: 600;">${item.nome}</td>
+                                </tr>`;
+                        });
+                        
+                        html += '</tbody></table>';
+                        containerItens.innerHTML = html;
+                    } else {
+                        containerItens.innerHTML = '<p style="text-align: center; color: #64748b; padding: 15px;">Nenhum produto adicionado até o momento.</p>';
+                    }
+                })
+                .catch(() => {
+                    containerItens.innerHTML = '<p style="text-align: center; color: #ef4444; padding: 10px;">Erro ao carregar detalhes da mesa.</p>';
+                });
+        }
+
+        function fecharModalDetalhesMesa() {
+            document.getElementById('modal-detalhes-mesa').style.display = 'none';
+        }
+        /* MÁSCARA E LÓGICA DO FILTRO DE DATA NO REIMPRIMIR */
+function abrirModalReimprimir() {
+    document.getElementById('modal-reimprimir').style.display = 'flex';
+    
+    // Define o campo de data automaticamente para o dia de hoje (YYYY-MM-DD)
+    const hoje = new Date().toISOString().split('T')[0];
+    const campoData = document.getElementById('filtro-data-reimprimir');
+    campoData.value = hoje;
+    
+    // Carrega os cupons do dia de hoje
+    carregarCuponsPorData();
+}
+
+function fecharModalReimprimir() {
+    document.getElementById('modal-reimprimir').style.display = 'none';
+}
+
+function carregarCuponsPorData() {
+    const dataSelecionada = document.getElementById('filtro-data-reimprimir').value;
+    const selectCupons = document.getElementById('select-cupons-historico');
+    
+    selectCupons.innerHTML = '<option value="" disabled selected>Buscando cupons...</option>';
+
+    fetch(`/api/historico-vendas?data=${dataSelecionada}`)
+        .then(res => res.json())
+        .then(data => {
+            if (!data.vendas || data.vendas.length === 0) {
+                selectCupons.innerHTML = '<option value="" disabled selected>Nenhum cupom nesta data.</option>';
+                return;
+            }
+
+            let html = '<option value="" disabled selected>Escolha o cupom desejado...</option>';
+            data.vendas.forEach(venda => {
+                html += `<option value="${venda.id}">Mesa ${venda.mesa} - R$ ${venda.total} (${venda.hora})</option>`;
+            });
+
+            selectCupons.innerHTML = html;
+        })
+        .catch(() => {
+            selectCupons.innerHTML = '<option value="" disabled selected>Erro ao carregar cupons.</option>';
+        });
+}
+/* SINCRONIZA O CAMPO DIGITADO COM O DROPDOWN */
+function sincronizarDigitacaoMesa(valor) {
+    const select = document.getElementById('select-mesa-cupom');
+    if (valor) {
+        select.value = valor;
+    } else {
+        select.value = "";
+    }
+}
+
+/* SINCRONIZA O DROPDOWN COM O CAMPO DIGITADO */
+function sincronizarSelectMesa(valor) {
+    const input = document.getElementById('input-numero-mesa-cupom');
+    input.value = valor;
+}
+
+/* LIMPA OS CAMPOS AO FECHAR O MODAL */
+function fecharModalCupom() {
+    document.getElementById('modal-cupom').style.display = 'none';
+    document.getElementById('input-numero-mesa-cupom').value = '';
+    document.getElementById('select-mesa-cupom').value = '';
+}
+        /* RENDERIZAÇÃO DAS COMANDAS NO MODAL (COM BOTÃO IMPRIMIR) */
+        function renderizarComandas(comandas, container) {
+            let html = '';
+            comandas.forEach(comanda => {
+                html += `
+                <div class="card-comanda-item">
+                    <div class="comanda-topo">
+                        <span class="titulo">Mesa ${comanda.numero_mesa}</span>
+                        <span class="total">R$ ${comanda.total.toFixed(2)}</span>
+                    </div>
+                    <table class="tabela-itens-comanda">
+                        <tbody>`;
+                
+                if (comanda.itens && comanda.itens.length > 0) {
+                    comanda.itens.forEach(item => {
+                        html += `
+                            <tr>
+                                <td class="qtd">${item.quantidade}x</td>
+                                <td>${item.nome}</td>
+                                <td style="text-align: right;">R$ ${(item.preco * item.quantidade).toFixed(2)}</td>
+                            </tr>`;
+                    });
+                } else {
+                    html += `<tr><td colspan="3" style="font-style: italic; color: #94a3b8;">Nenhum item lançado.</td></tr>`;
+                }
+
+                html += `
+                        </tbody>
+                    </table>
+                    <div style="text-align: right; margin-top: 12px; display: flex; justify-content: flex-end; gap: 8px;">
+                        <a href="/imprimir_cupom?numero_mesa=${comanda.numero_mesa}" target="_blank" style="padding: 6px 12px; background: #10b981; color: white; text-decoration: none; border-radius: 4px; font-size: 12px; font-weight: bold; display: inline-flex; align-items: center; gap: 4px;">🖨️ Imprimir</a>
+                        <button type="button" onclick="verDetalhesMesaModal(${comanda.numero_mesa})" style="padding: 6px 14px; background: #1e293b; color: white; border: none; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">Ver Detalhes</button>
+                    </div>
+                </div>`;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function varrerMesasOcupadasDoDOM(container) {
+            const mesasAdicionadas = new Set();
+            const elementosOcupados = document.querySelectorAll('.card-mesa.ocupada');
+            
+            if (elementosOcupados.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; color: #64748b; padding: 30px;">
+                        <span style="font-size: 40px; display: block; margin-bottom: 10px;">☕</span>
+                        Nenhuma comanda aberta no momento.
+                    </div>`;
+                return;
+            }
+
+            let html = '';
+            elementosOcupados.forEach(card => {
+                const numEl = card.querySelector('.num-mesa');
+                const textoMesa = numEl ? numEl.innerText : "Mesa";
+                const numeroMesa = textoMesa.replace(/\D/g, '');
+
+                if (numeroMesa && !mesasAdicionadas.has(numeroMesa)) {
+                    mesasAdicionadas.add(numeroMesa);
+
+                    html += `
+                    <div class="card-comanda-item">
+                        <div class="comanda-topo">
+                            <span class="titulo">Mesa ${numeroMesa} (Ocupada)</span>
+                            <span class="total" style="color: #f97316;">Comanda Em Aberto</span>
+                        </div>
+                        <p style="font-size: 13px; color: #475569; margin-bottom: 10px;">Atendimento em andamento nesta mesa.</p>
+                        <div style="text-align: right; display: flex; justify-content: flex-end; gap: 8px;">
+                            <a href="/imprimir_cupom?numero_mesa=${numeroMesa}" target="_blank" style="padding: 6px 12px; background: #10b981; color: white; text-decoration: none; border-radius: 4px; font-size: 12px; font-weight: bold; display: inline-flex; align-items: center; gap: 4px;">🖨️ Imprimir</a>
+                            <button type="button" onclick="verDetalhesMesaModal(${numeroMesa})" style="padding: 6px 14px; background: #1e293b; color: white; border: none; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">Ver Detalhes</button>
+                        </div>
+                    </div>`;
+                }
+            });
+
+            container.innerHTML = html;
+        }
+
+        /* DEMAIS FUNÇÕES DO SISTEMA */
         function realizarLogin(event) {
             event.preventDefault();
             const usuarioInput = document.getElementById("usuario").value;
@@ -577,7 +821,7 @@
             if (usuarioInput === "admin" && senhaInput === "1234") {
                 localStorage.setItem("usuarioLogado", "true");
                 document.getElementById("login-container").style.display = "none";
-                document.getElementById("app-principal").style.display = "block";
+                document.getElementById("app-principal").style.display = "flex";
             } else {
                 document.getElementById("erro-msg").style.display = "block";
             }
@@ -585,34 +829,16 @@
 
         function sairDoSistema() {
             localStorage.removeItem("usuarioLogado");
-            document.getElementById("usuario").value = "";
-            document.getElementById("senha").value = "";
-            document.getElementById("erro-msg").style.display = "none";
             document.getElementById("app-principal").style.display = "none";
             document.getElementById("login-container").style.display = "flex";
         }
 
-        function abrirModalBalcao() {
-            document.getElementById('modal-balcao').style.display = 'flex';
-        }
-        function fecharModalBalcao() {
-            document.getElementById('modal-balcao').style.display = 'none';
-            document.getElementById('form-balcao').reset();
-        }
-
-        function abrirModalCupom() {
-            document.getElementById('modal-cupom').style.display = 'flex';
-        }
-        function fecharModalCupom() {
-            document.getElementById('modal-cupom').style.display = 'none';
-        }
-
-        function abrirModalReimprimir() {
-            document.getElementById('modal-reimprimir').style.display = 'flex';
-        }
-        function fecharModalReimprimir() {
-            document.getElementById('modal-reimprimir').style.display = 'none';
-        }
+        function abrirModalBalcao() { document.getElementById('modal-balcao').style.display = 'flex'; }
+        function fecharModalBalcao() { document.getElementById('modal-balcao').style.display = 'none'; document.getElementById('form-balcao').reset(); }
+        function abrirModalCupom() { document.getElementById('modal-cupom').style.display = 'flex'; }
+        function fecharModalCupom() { document.getElementById('modal-cupom').style.display = 'none'; }
+        function abrirModalReimprimir() { document.getElementById('modal-reimprimir').style.display = 'flex'; }
+        function fecharModalReimprimir() { document.getElementById('modal-reimprimir').style.display = 'none'; }
     </script>
 </body>
 </html>

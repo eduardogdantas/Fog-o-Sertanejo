@@ -147,7 +147,6 @@
             margin-bottom: 5px;
         }
 
-        /* ADICIONADO: .grupo-input select para herdar os mesmos estilos do input */
         .grupo-input input, .grupo-input select {
             padding: 10px 14px;
             border: 1px solid #cbd5e1;
@@ -234,7 +233,8 @@
 
         <!-- Botões de Ação Superior -->
         <div class="acoes-topo">
-            <a href="/liberar_mesa/{{ mesa[0] }}" class="btn btn-liberar">
+            <!-- Força a volta para o mapa de vendas ao liberar -->
+            <a href="/liberar_mesa/{{ mesa[0] }}?origem=vendas" class="btn btn-liberar">
                 <i class="fa-solid fa-check-circle"></i> Liberar Mesa
             </a>
             <a href="/vendas" class="btn btn-voltar">
@@ -252,18 +252,16 @@
         <form action="/adicionar_pedido/{{ mesa[0] }}" method="POST" class="form-pedido">
             <div class="grupo-input">
                 <label for="produto">Produto</label>
-                <!-- O input de texto foi removido e substituído por este Select -->
                 <select id="produto" name="produto" required>
                     <option value="" disabled selected>Selecione um produto...</option>
                     
                     {% for categoria, lista_produtos in produtos_por_categoria.items() %}
-
-                    <optgroup label="{{ categoria }}"></optgroup>
-                    {% for prod in lista_produtos %}
-                    <option value="{{ prod.nome }}">{{ prod.nome }}</option>
-            {% endfor %}
-        </optgroup>
-        {% endfor %}
+                        <optgroup label="{{ categoria }}">
+                            {% for prod in lista_produtos %}
+                                <option value="{{ prod.nome }}">{{ prod.nome }}</option>
+                            {% endfor %}
+                        </optgroup>
+                    {% endfor %}
                 </select>
             </div>
             <div class="grupo-input">

@@ -5,8 +5,9 @@ import re
 
 app = Flask(__name__)
 app.secret_key = "chave_super_secreta_restaurante"
+
 def conectar_db():
-  return sqlite3.connect("restaurante.db")
+    return sqlite3.connect("restaurante.db")
 
 # ==========================================
 # CRIAÇÃO AUTOMÁTICA DE TABELAS AO INICIAR
@@ -73,7 +74,9 @@ def home():
     return render_template("index.html", mesas=mesas, por_praca=por_praca, estoque_itens=estoque_itens, vendas_fechadas=vendas_fechadas)
 
 
+# Aceita tanto /mesa/1 quanto /ver_mesa/1 para evitar erro 404!
 @app.route("/mesa/<int:numero_mesa>")
+@app.route("/ver_mesa/<int:numero_mesa>")
 def ver_mesa(numero_mesa):
     conexao = conectar_db()
     cursor = conexao.cursor()
@@ -117,51 +120,51 @@ def ver_mesa(numero_mesa):
 
 @app.route("/mudar_status/<int:numero_mesa>/<novo_status>")
 def mudar_status(numero_mesa, novo_status):
-  conexao = conectar_db()
-  cursor = conexao.cursor()
-  cursor.execute(
-      "UPDATE mesas SET status = ? WHERE numero = ?", (novo_status, numero_mesa)
-  )
-  conexao.commit()
-  conexao.close()
-  return redirect(url_for("ver_mesa", numero_mesa=numero_mesa))
+    conexao = conectar_db()
+    cursor = conexao.cursor()
+    cursor.execute(
+        "UPDATE mesas SET status = ? WHERE numero = ?", (novo_status, numero_mesa)
+    )
+    conexao.commit()
+    conexao.close()
+    return redirect(url_for("ver_mesa", numero_mesa=numero_mesa))
 
 
 def atualizar_status_mesa(numero_mesa, novo_status):
-  conexao = conectar_db()
-  cursor = conexao.cursor()
-  cursor.execute(
-      "UPDATE mesas SET status = ? WHERE numero = ?", (novo_status, numero_mesa)
-  )
-  conexao.commit()
-  conexao.close()
+    conexao = conectar_db()
+    cursor = conexao.cursor()
+    cursor.execute(
+        "UPDATE mesas SET status = ? WHERE numero = ?", (novo_status, numero_mesa)
+    )
+    conexao.commit()
+    conexao.close()
 
 
 @app.route("/adicionar_pedido/<int:numero_mesa>", methods=["POST"])
 def adicionar_pedido(numero_mesa):
-  produto = request.form.get("produto")
-  quantidade = int(request.form.get("quantidade", 1))
+    produto = request.form.get("produto")
+    quantidade = int(request.form.get("quantidade", 1))
 
-  if not produto:
-    return "Erro: O campo produto não foi enviado!", 400
+    if not produto:
+        return "Erro: O campo produto não foi enviado!", 400
 
-  conexao = conectar_db()
-  cursor = conexao.cursor()
+    conexao = conectar_db()
+    cursor = conexao.cursor()
 
-  cursor.execute("SELECT preco FROM estoque WHERE nome = ?", (produto,))
-  resultado = cursor.fetchone()
-  preco_unitario = resultado[0] if resultado else 0.0
+    cursor.execute("SELECT preco FROM estoque WHERE nome = ?", (produto,))
+    resultado = cursor.fetchone()
+    preco_unitario = resultado[0] if resultado else 0.0
 
-  cursor.execute(
-      "INSERT INTO pedidos (mesa_numero, produto, quantidade, preco) VALUES (?, ?, ?, ?)",
-      (numero_mesa, produto, quantidade, preco_unitario),
-  )
-  conexao.commit()
-  conexao.close()
+    cursor.execute(
+        "INSERT INTO pedidos (mesa_numero, produto, quantidade, preco) VALUES (?, ?, ?, ?)",
+        (numero_mesa, produto, quantidade, preco_unitario),
+    )
+    conexao.commit()
+    conexao.close()
 
-  atualizar_status_mesa(numero_mesa, "Ocupada")
+    atualizar_status_mesa(numero_mesa, "Ocupada")
 
-  return redirect(url_for("ver_mesa", numero_mesa=numero_mesa))
+    return redirect(url_for("ver_mesa", numero_mesa=numero_mesa))
 
 
 @app.route("/estoque", methods=["GET", "POST"])
@@ -234,65 +237,65 @@ def gerenciar_estoque():
 
 @app.route("/caixa", methods=["GET", "POST"])
 def gerenciar_caixa():
-  conexao = sqlite3.connect("restaurante.db")
-  cursor = conexao.cursor()
+    conexao = sqlite3.connect("restaurante.db")
+    cursor = conexao.cursor()
 
-  cursor.execute("""CREATE TABLE IF NOT EXISTS caixa 
+    cursor.execute("""CREATE TABLE IF NOT EXISTS caixa 
                     (id INTEGER PRIMARY KEY, status TEXT, valor_inicial REAL, valor_final REAL, data TIMESTAMP DEFAULT CURRENT_TIMESTAMP)""")
 
-  if request.method == "POST":
-    acao = request.form.get("acao")
+    if request.method == "POST":
+        acao = request.form.get("acao")
 
-    if acao == "abrir":
-      valor = float(request.form.get("valor", 0))
-      cursor.execute(
-          "INSERT INTO caixa (status, valor_inicial) VALUES ('aberto', ?)",
-          (valor,),
-      )
-      conexao.commit()
+        if acao == "abrir":
+            valor = float(request.form.get("valor", 0))
+            cursor.execute(
+                "INSERT INTO caixa (status, valor_inicial) VALUES ('aberto', ?)",
+                (valor,),
+            )
+            conexao.commit()
 
-    elif acao == "fechar":
-      cursor.execute(
-          "SELECT mesa_numero, produto, quantidade, preco FROM pedidos"
-      )
-      itens_vendidos = cursor.fetchall()
+        elif acao == "fechar":
+            cursor.execute(
+                "SELECT mesa_numero, produto, quantidade, preco FROM pedidos"
+            )
+            itens_vendidos = cursor.fetchall()
 
-      total_vendas = 0
-      data_atual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            total_vendas = 0
+            data_atual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-      for item in itens_vendidos:
-        mesa, produto, qtd, preco = item
-        subtotal = float(qtd) * float(preco)
-        total_vendas += subtotal
+            for item in itens_vendidos:
+                mesa, produto, qtd, preco = item
+                subtotal = float(qtd) * float(preco)
+                total_vendas += subtotal
 
-        cursor.execute(
-            "INSERT INTO financeiro (descricao, valor, tipo, data) VALUES (?, ?, ?, ?)",
-            (f"Venda Mesa {mesa}: {produto} (x{qtd})", subtotal, "Receita", data_atual),
-        )
+                cursor.execute(
+                    "INSERT INTO financeiro (descricao, valor, tipo, data) VALUES (?, ?, ?, ?)",
+                    (f"Venda Mesa {mesa}: {produto} (x{qtd})", subtotal, "Receita", data_atual),
+                )
 
-      cursor.execute(
-          "UPDATE caixa SET status = 'fechado', valor_final = ? WHERE status = 'aberto'",
-          (total_vendas,),
-      )
-      cursor.execute("DELETE FROM pedidos")
-      cursor.execute("UPDATE mesas SET status = 'Disponivel'")
-      conexao.commit()
+            cursor.execute(
+                "UPDATE caixa SET status = 'fechado', valor_final = ? WHERE status = 'aberto'",
+                (total_vendas,),
+            )
+            cursor.execute("DELETE FROM pedidos")
+            cursor.execute("UPDATE mesas SET status = 'Disponivel'")
+            conexao.commit()
 
-    return redirect("/caixa")
+        return redirect("/caixa")
 
-  cursor.execute("SELECT * FROM caixa ORDER BY id DESC")
-  registros = cursor.fetchall()
-  conexao.close()
+    cursor.execute("SELECT * FROM caixa ORDER BY id DESC")
+    registros = cursor.fetchall()
+    conexao.close()
 
-  return render_template("caixa.html", registros=registros)
+    return render_template("caixa.html", registros=registros)
 
 
 @app.route("/financeiro")
 def financeiro():
-  conexao = sqlite3.connect("restaurante.db")
-  cursor = conexao.cursor()
+    conexao = sqlite3.connect("restaurante.db")
+    cursor = conexao.cursor()
 
-  cursor.execute("""
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS financeiro (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             descricao TEXT,
@@ -301,31 +304,31 @@ def financeiro():
             data TEXT
         )
     """)
-  conexao.commit()
+    conexao.commit()
 
-  cursor.execute("SELECT * FROM financeiro ORDER BY id DESC")
-  movimentacoes = cursor.fetchall()
+    cursor.execute("SELECT * FROM financeiro ORDER BY id DESC")
+    movimentacoes = cursor.fetchall()
 
-  cursor.execute("SELECT SUM(valor) FROM financeiro WHERE tipo = 'Receita'")
-  resultado = cursor.fetchone()[0]
-  total_vendido = resultado if resultado else 0.0
+    cursor.execute("SELECT SUM(valor) FROM financeiro WHERE tipo = 'Receita'")
+    resultado = cursor.fetchone()[0]
+    total_vendido = resultado if resultado else 0.0
 
-  conexao.close()
-  return render_template(
-      "financeiro.html", movimentacoes=movimentacoes, total_vendido=total_vendido
-  )
+    conexao.close()
+    return render_template(
+        "financeiro.html", movimentacoes=movimentacoes, total_vendido=total_vendido
+    )
 
 
 @app.route("/adicionar_financa", methods=["POST"])
 def adicionar_financa():
-  descricao = request.form.get("descricao")
-  valor = float(request.form.get("valor", 0))
-  tipo = request.form.get("tipo")
-  data_atual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    descricao = request.form.get("descricao")
+    valor = float(request.form.get("valor", 0))
+    tipo = request.form.get("tipo")
+    data_atual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-  conexao = conectar_db()
-  cursor = conexao.cursor()
-  cursor.execute("""
+    conexao = conectar_db()
+    cursor = conexao.cursor()
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS financeiro (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             descricao TEXT,
@@ -334,20 +337,20 @@ def adicionar_financa():
             data TEXT
         )
     """)
-  cursor.execute(
-      "INSERT INTO financeiro (descricao, valor, tipo, data) VALUES (?, ?, ?, ?)",
-      (descricao, valor, tipo, data_atual),
-  )
-  conexao.commit()
-  conexao.close()
-  return redirect(url_for("financeiro"))
+    cursor.execute(
+        "INSERT INTO financeiro (descricao, valor, tipo, data) VALUES (?, ?, ?, ?)",
+        (descricao, valor, tipo, data_atual),
+    )
+    conexao.commit()
+    conexao.close()
+    return redirect(url_for("financeiro"))
 
 
 @app.route("/limpar_financas", methods=["POST"])
 def limpar_financas():
-  conexao = sqlite3.connect("restaurante.db")
-  cursor = conexao.cursor()
-  cursor.execute("""
+    conexao = sqlite3.connect("restaurante.db")
+    cursor = conexao.cursor()
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS financeiro (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             descricao TEXT,
@@ -356,10 +359,10 @@ def limpar_financas():
             data TEXT
         )
     """)
-  cursor.execute("DELETE FROM financeiro")
-  conexao.commit()
-  conexao.close()
-  return redirect(url_for("financeiro"))
+    cursor.execute("DELETE FROM financeiro")
+    conexao.commit()
+    conexao.close()
+    return redirect(url_for("financeiro"))
 
 
 def registrar_venda_financeiro(mesa_numero):
@@ -430,18 +433,16 @@ def liberar_mesa(numero_mesa):
     conexao.commit()
     conexao.close()
 
-    # 1. Se passou o parâmetro 'origem' explicitamente na URL
     if origem == "vendas":
         return redirect(url_for("vendas"))
     elif origem == "home":
-        return redirect(url_for("home"))
+        return redirect(url_for("vendas"))
 
-    # 2. Se não passou parâmetro, volta para a página exata de onde o usuário veio
     if request.referrer:
         return redirect(request.referrer)
 
-    # 3. Fallback padrão
-    return redirect(url_for("home"))
+    return redirect(url_for("vendas"))
+
 
 @app.route('/reimprimir_fechada')
 def reimprimir_fechada():
@@ -471,13 +472,10 @@ def reimprimir_fechada():
 def relatorios():
     filtro_tipo = request.args.get('filtro', 'dia') 
     
-    # Datas atuais do sistema
     data_atual_padrao = datetime.now().strftime('%Y-%m-%d')
     mes_atual_padrao = datetime.now().strftime('%Y-%m')
-    # Pega o Ano e a Semana atual no formato ISO (ex: 2026-W31)
     semana_atual_padrao = datetime.now().strftime('%G-W%V')
     
-    # Captura o que o usuário escolheu
     data_selecionada = request.args.get('data_escolhida', data_atual_padrao)
     mes_selecionado = request.args.get('mes_ano', mes_atual_padrao)
     semana_selecionada = request.args.get('semana_escolhida', semana_atual_padrao)
@@ -490,17 +488,14 @@ def relatorios():
         cursor.execute("SELECT id, descricao, tipo, valor FROM financeiro WHERE tipo = 'Receita' AND data LIKE ? ORDER BY id DESC", (termo_busca,))
         
     elif filtro_tipo == 'semana':
-        # Transforma '2026-W31' em um intervalo de datas (Segunda a Domingo)
         try:
             ano_str, semana_str = semana_selecionada.split('-W')
-            # %G (Ano ISO), %V (Semana ISO), %u (Dia da semana 1=Segunda, 7=Domingo)
             inicio_semana = datetime.strptime(f'{ano_str}-W{semana_str}-1', "%G-W%V-%u").strftime('%Y-%m-%d 00:00:00')
             fim_semana = datetime.strptime(f'{ano_str}-W{semana_str}-7', "%G-W%V-%u").strftime('%Y-%m-%d 23:59:59')
         except ValueError:
             inicio_semana = "1900-01-01 00:00:00"
             fim_semana = "2100-01-01 23:59:59"
             
-        # Busca usando 'Maior/Igual a Segunda' e 'Menor/Igual a Domingo'
         cursor.execute("""
             SELECT id, descricao, tipo, valor 
             FROM financeiro 
@@ -565,8 +560,9 @@ def relatorios():
         filtro_atual=filtro_tipo,
         mes_selecionado=mes_selecionado,
         data_selecionada=data_selecionada,
-        semana_selecionada=semana_selecionada # Retornando a variável nova pro HTML
+        semana_selecionada=semana_selecionada
     )
+
 
 @app.route('/vendas')
 def vendas():
@@ -648,6 +644,7 @@ def venda_balcao():
     else:
         conexao.close()
         return f"<h1>ERRO!</h1> <p>O produto '<b>{produto}</b>' não existe no estoque.</p>"
+
     
 @app.route("/configuracao")
 def configuracao():
@@ -666,7 +663,7 @@ def salvar_novo_usuario():
 
     nome = request.form.get('nome')
     senha = request.form.get('senha')
-    permissao = request.form.get('permissao', 'comum') # Pega do HTML
+    permissao = request.form.get('permissao', 'comum')
 
     conexao = conectar_db()
     cursor = conexao.cursor()
@@ -675,6 +672,7 @@ def salvar_novo_usuario():
     conexao.close()
         
     return redirect(url_for('configuracao'))
+
 
 @app.route('/excluir_usuario/<int:id_usuario>', methods=['POST'])
 def excluir_usuario(id_usuario):
@@ -687,9 +685,10 @@ def excluir_usuario(id_usuario):
     conexao.commit()
     conexao.close()
     return redirect(url_for('configuracao'))
+
+
 @app.route('/alternar_permissao/<int:id_usuario>', methods=['POST'])
 def alternar_permissao(id_usuario):
-    # Nova rota: O Admin pode dar ou tirar poderes de outros usuários
     if session.get("usuario_nome") != "admin" and session.get("permissao") != "admin":
         return "Erro: Sem permissão.", 403
 
@@ -701,15 +700,15 @@ def alternar_permissao(id_usuario):
     conexao.commit()
     conexao.close()
     return redirect(url_for('configuracao'))
+
+
 def criar_usuario_admin():
     conexao = conectar_db()
     cursor = conexao.cursor()
     
-    # Verifica se já existe algum usuário 'adm'
     cursor.execute("SELECT * FROM usuarios WHERE nome = 'admin'")
     admin_existe = cursor.fetchone()
     
-    # Se não existir, ele cria um automaticamente com a senha '1234'
     if not admin_existe:
         cursor.execute("INSERT INTO usuarios (nome, senha) VALUES ('admin', '1234')")
         conexao.commit()
@@ -717,9 +716,9 @@ def criar_usuario_admin():
         
     conexao.close()
 
-# Executa as funções ao iniciar o servidor
 criar_tabelas()
-criar_usuario_admin() # <-- Adicione esta linha
+criar_usuario_admin()
+
 
 @app.route('/imprimir_cupom')
 def imprimir_cupom():
@@ -761,6 +760,8 @@ def imprimir_cupom():
         total=total_venda,
         data_hora=datetime.now().strftime("%d/%m/%Y %H:%M")
     )
+
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -777,7 +778,6 @@ def login():
             session["logado"] = True
             session["usuario_nome"] = usuario
             
-            
             try:
                 session["permissao"] = user[3]
             except IndexError:
@@ -789,9 +789,94 @@ def login():
             
     return render_template("login.html")
 
+
+# ==========================================
+# API DE COMANDAS ATIVAS (ÚNICA E CORRIGIDA)
+# ==========================================
+@app.route('/api/comandas-ativas')
+def comandas_ativas():
+    conexao = conectar_db()
+    cursor = conexao.cursor()
+    
+    cursor.execute("SELECT DISTINCT mesa_numero FROM pedidos")
+    mesas_com_pedidos = cursor.fetchall()
+    
+    comandas = []
+    
+    for m in mesas_com_pedidos:
+        num_mesa_raw = m[0]
+        if num_mesa_raw is None:
+            continue
+            
+        cursor.execute(
+            "SELECT produto, quantidade, preco FROM pedidos WHERE CAST(mesa_numero AS TEXT) = CAST(? AS TEXT)", 
+            (num_mesa_raw,)
+        )
+        pedidos = cursor.fetchall()
+        
+        total_mesa = 0.0
+        lista_itens = []
+        
+        for item in pedidos:
+            nome_prod, qtd, preco = item
+            subtotal = float(qtd or 0) * float(preco or 0)
+            total_mesa += subtotal
+            lista_itens.append({
+                'nome': nome_prod,
+                'quantidade': int(qtd or 1),
+                'preco': float(preco or 0)
+            })
+            
+        comandas.append({
+            'numero_mesa': str(num_mesa_raw),
+            'total': total_mesa,
+            'itens': lista_itens
+        })
+        
+    conexao.close()
+    return jsonify({'comandas': comandas})
+
+
+# ==========================================
+# API DE HISTÓRICO DE VENDAS POR DATA
+# ==========================================
+@app.route('/api/historico-vendas')
+def obter_historico_vendas():
+    data_escolhida = request.args.get('data')
+    if not data_escolhida:
+        data_escolhida = datetime.now().strftime('%Y-%m-%d')
+
+    conexao = conectar_db()
+    cursor = conexao.cursor()
+    
+    cursor.execute("""
+        SELECT id, mesa_numero, total, data_hora 
+        FROM historico_fechamentos 
+        WHERE data_hora LIKE ? 
+        ORDER BY id DESC
+    """, (f"{data_escolhida}%",))
+    
+    vendas_db = cursor.fetchall()
+    conexao.close()
+
+    resultado = []
+    for v in vendas_db:
+        hora_formatada = v[3].split(' ')[1] if ' ' in v[3] else v[3]
+        resultado.append({
+            'id': v[0],
+            'mesa': v[1],
+            'total': f"{v[2]:.2f}",
+            'hora': hora_formatada
+        })
+
+    return jsonify({'vendas': resultado})
+
+
 @app.route("/sair")
 def sair():
     session.clear() 
     return redirect(url_for("login"))
+
+
 if __name__ == "__main__":
-  app.run(debug=True)
+    app.run(debug=True)
