@@ -151,14 +151,30 @@ def adicionar_pedido(numero_mesa):
     conexao = conectar_db()
     cursor = conexao.cursor()
 
-    cursor.execute("SELECT preco FROM estoque WHERE nome = ?", (produto,))
+    # 1. Busca o preço e a quantidade atual do produto no estoque
+    cursor.execute("SELECT preco, quantidade FROM estoque WHERE nome = ?", (produto,))
     resultado = cursor.fetchone()
-    preco_unitario = resultado[0] if resultado else 0.0
+    
+    if resultado:
+        preco_unitario = resultado[0]
+        estoque_atual = resultado[1]
+        
+        # 2. Subtrai do estoque e garante que não fique negativo
+        novo_estoque = estoque_atual - quantidade
+        if novo_estoque < 0:
+            novo_estoque = 0 
+            
+        # 3. Atualiza o estoque no banco
+        cursor.execute("UPDATE estoque SET quantidade = ? WHERE nome = ?", (novo_estoque, produto))
+    else:
+        preco_unitario = 0.0
 
+    # 4. Insere o pedido na mesa
     cursor.execute(
         "INSERT INTO pedidos (mesa_numero, produto, quantidade, preco) VALUES (?, ?, ?, ?)",
         (numero_mesa, produto, quantidade, preco_unitario),
     )
+    
     conexao.commit()
     conexao.close()
 
@@ -203,19 +219,36 @@ def gerenciar_estoque():
 
         try:
             if acao == "adicionar":
-                nome_prod = request.form.get("nome_texto", "")
-                cursor.execute(
-                    "INSERT INTO estoque (nome, quantidade, preco) VALUES (?, ?, ?)",
-                    (nome_prod, int(qtd), preco),
-                )
+                nome_prod = request.form.get("nome_texto", "").strip()
+                
+                cursor.execute("SELECT id, quantidade FROM estoque WHERE LOWER(nome) = LOWER(?)", (nome_prod,))
+                produto_existente = cursor.fetchone()
+                
+                if produto_existente:
+                    produto_id = produto_existente[0]
+                    quantidade_antiga = produto_existente[1] if produto_existente[1] else 0
+                    quantidade_nova = quantidade_antiga + int(qtd)
+                    
+                    cursor.execute(
+                        "UPDATE estoque SET quantidade = ?, preco = ? WHERE id = ?",
+                        (quantidade_nova, preco, produto_id)
+                    )
+                else:
+                    cursor.execute(
+                        "INSERT INTO estoque (nome, quantidade, preco) VALUES (?, ?, ?)",
+                        (nome_prod, int(qtd), preco),
+                    )
+                    
             elif acao == "remover":
                 cursor.execute("DELETE FROM estoque WHERE id = ?", (identificador,))
+                
             elif acao == "alterar":
-                nome_prod = request.form.get("nome_texto", "")
+                nome_prod = request.form.get("nome_texto", "").strip()
                 cursor.execute(
                     "UPDATE estoque SET nome = ?, quantidade = ?, preco = ? WHERE id = ?",
                     (nome_prod, int(qtd), preco, identificador),
                 )
+                
             elif acao == "reajustar":
                 valor_reajuste = request.form.get("valor_reajuste", "0")
                 try:
@@ -791,15 +824,20 @@ def login():
 
 
 # ==========================================
-# API DE COMANDAS ATIVAS (ÚNICA E CORRIGIDA)
+# API DE COMANDAS ATIVAS
 # ==========================================
 @app.route('/api/comandas-ativas')
 def comandas_ativas():
     conexao = conectar_db()
     cursor = conexao.cursor()
     
-    cursor.execute("SELECT DISTINCT mesa_numero FROM pedidos")
-    mesas_com_pedidos = cursor.fetchall()
+    # Busca todas as mesas que possuem pedidos ativos
+    try:
+        cursor.execute("SELECT DISTINCT mesa_numero FROM pedidos")
+        mesas_com_pedidos = cursor.fetchall()
+    except sqlite3.OperationalError:
+        conexao.close()
+        return jsonify({'comandas': []})
     
     comandas = []
     
@@ -837,9 +875,6 @@ def comandas_ativas():
     return jsonify({'comandas': comandas})
 
 
-# ==========================================
-# API DE HISTÓRICO DE VENDAS POR DATA
-# ==========================================
 @app.route('/api/historico-vendas')
 def obter_historico_vendas():
     data_escolhida = request.args.get('data')
@@ -870,8 +905,81 @@ def obter_historico_vendas():
         })
 
     return jsonify({'vendas': resultado})
+@app.route('/api/fazer_pedido', methods=['POST'])
+def api_fazer_pedido():
+    dados = request.get_json()
+    if not dados:
+        return jsonify({"erro": "Nenhum dado enviado."}), 400
 
+    numero_mesa = dados.get('numero_mesa')
+    nome_produto = dados.get('produto')
+    quantidade_pedida = int(dados.get('quantidade', 1))
 
+    conexao = conectar_db()
+    cursor = conexao.cursor()
+
+    try:
+        # 1. Busca o produto no estoque
+        cursor.execute("SELECT id, preco, quantidade FROM estoque WHERE nome = ?", (nome_produto,))
+        resultado = cursor.fetchone()
+
+        if not resultado:
+            conexao.close()
+            return jsonify({"erro": "Produto não encontrado no cardápio."}), 404
+
+        produto_id, preco_unitario, estoque_atual = resultado
+
+        # 2. Validação de estoque
+        if estoque_atual < quantidade_pedida:
+            conexao.close()
+            return jsonify({"erro": f"Estoque insuficiente. Restam apenas {estoque_atual} unidades."}), 400
+
+        # 3. Atualiza o estoque subtraindo os itens
+        novo_estoque = estoque_atual - quantidade_pedida
+        cursor.execute("UPDATE estoque SET quantidade = ? WHERE id = ?", (novo_estoque, produto_id))
+
+        # 4. Insere o pedido na tabela de pedidos da mesa
+        cursor.execute(
+            "INSERT INTO pedidos (mesa_numero, produto, quantidade, preco) VALUES (?, ?, ?, ?)",
+            (str(numero_mesa), nome_produto, quantidade_pedida, preco_unitario)
+        )
+
+        # 5. Atualiza o status da mesa para ocupada
+        cursor.execute(
+            "UPDATE mesas SET status = 'Ocupada' WHERE numero = ?",
+            (str(numero_mesa),)
+        )
+
+        conexao.commit()
+        conexao.close()
+
+        return jsonify({
+            "mensagem": "Pedido registrado com sucesso!",
+            "novo_estoque": novo_estoque
+        }), 200
+
+    except Exception as e:
+        conexao.rollback()
+        conexao.close()
+        return jsonify({"erro": "Erro interno ao processar o pedido.", "detalhes": str(e)}), 500
+@app.route('/api/produtos', methods=['GET'])
+def api_listar_produtos():
+    conexao = conectar_db()
+    cursor = conexao.cursor()
+    cursor.execute("SELECT id, nome, preco, quantidade FROM estoque")
+    produtos_db = cursor.fetchall()
+    conexao.close()
+
+    lista_produtos = []
+    for p in produtos_db:
+        lista_produtos.append({
+            "id": p[0],
+            "nome": p[1],
+            "preco": p[2],
+            "quantidade": p[3]
+        })
+
+    return jsonify({"produtos": lista_produtos}), 200
 @app.route("/sair")
 def sair():
     session.clear() 
@@ -879,4 +987,4 @@ def sair():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
