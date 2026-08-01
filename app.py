@@ -980,6 +980,15 @@ def api_listar_produtos():
         })
 
     return jsonify({"produtos": lista_produtos}), 200
+@app.route('/api/mesas', methods=['GET'])
+def get_mesas():
+    mesas = [
+        {"numero": 1, "disponivel": True},   # True = Verde (Disponível)
+        {"numero": 2, "disponivel": False},  # False = Vermelho (Ocupado)
+        {"numero": 3, "disponivel": True},
+        {"numero": 4, "disponivel": True}
+    ]
+    return {"mesas": mesas}
 @app.route("/sair")
 def sair():
     session.clear() 
