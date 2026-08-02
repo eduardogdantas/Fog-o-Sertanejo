@@ -816,11 +816,22 @@ def login():
             except IndexError:
                 session["permissao"] = "admin" if usuario == "admin" else "comum"
                 
+            # Se for usuário comum (garçom), vai direto para o app mobile
+            if session["permissao"] == "comum":
+                return redirect(url_for("tela_garcom"))
+                
             return redirect(url_for("home"))
         else:
             return render_template("login.html", erro="Usuário ou senha incorretos!")
             
     return render_template("login.html")
+
+
+@app.route("/garcom")
+def tela_garcom():
+    if not session.get("logado"):
+        return redirect(url_for("login"))
+    return render_template("garcom.html")
 
 
 # ==========================================
@@ -831,7 +842,6 @@ def comandas_ativas():
     conexao = conectar_db()
     cursor = conexao.cursor()
     
-    # Busca todas as mesas que possuem pedidos ativos
     try:
         cursor.execute("SELECT DISTINCT mesa_numero FROM pedidos")
         mesas_com_pedidos = cursor.fetchall()
@@ -905,6 +915,8 @@ def obter_historico_vendas():
         })
 
     return jsonify({'vendas': resultado})
+
+
 @app.route('/api/fazer_pedido', methods=['POST'])
 def api_fazer_pedido():
     dados = request.get_json()
@@ -919,7 +931,6 @@ def api_fazer_pedido():
     cursor = conexao.cursor()
 
     try:
-        # 1. Busca o produto no estoque
         cursor.execute("SELECT id, preco, quantidade FROM estoque WHERE nome = ?", (nome_produto,))
         resultado = cursor.fetchone()
 
@@ -929,22 +940,18 @@ def api_fazer_pedido():
 
         produto_id, preco_unitario, estoque_atual = resultado
 
-        # 2. Validação de estoque
         if estoque_atual < quantidade_pedida:
             conexao.close()
             return jsonify({"erro": f"Estoque insuficiente. Restam apenas {estoque_atual} unidades."}), 400
 
-        # 3. Atualiza o estoque subtraindo os itens
         novo_estoque = estoque_atual - quantidade_pedida
         cursor.execute("UPDATE estoque SET quantidade = ? WHERE id = ?", (novo_estoque, produto_id))
 
-        # 4. Insere o pedido na tabela de pedidos da mesa
         cursor.execute(
             "INSERT INTO pedidos (mesa_numero, produto, quantidade, preco) VALUES (?, ?, ?, ?)",
             (str(numero_mesa), nome_produto, quantidade_pedida, preco_unitario)
         )
 
-        # 5. Atualiza o status da mesa para ocupada
         cursor.execute(
             "UPDATE mesas SET status = 'Ocupada' WHERE numero = ?",
             (str(numero_mesa),)
@@ -962,6 +969,8 @@ def api_fazer_pedido():
         conexao.rollback()
         conexao.close()
         return jsonify({"erro": "Erro interno ao processar o pedido.", "detalhes": str(e)}), 500
+
+
 @app.route('/api/produtos', methods=['GET'])
 def api_listar_produtos():
     conexao = conectar_db()
@@ -980,15 +989,19 @@ def api_listar_produtos():
         })
 
     return jsonify({"produtos": lista_produtos}), 200
+
+
 @app.route('/api/mesas', methods=['GET'])
 def get_mesas():
     mesas = [
-        {"numero": 1, "disponivel": True},   # True = Verde (Disponível)
-        {"numero": 2, "disponivel": False},  # False = Vermelho (Ocupado)
+        {"numero": 1, "disponivel": True},
+        {"numero": 2, "disponivel": False},
         {"numero": 3, "disponivel": True},
         {"numero": 4, "disponivel": True}
     ]
     return {"mesas": mesas}
+
+
 @app.route("/sair")
 def sair():
     session.clear() 
