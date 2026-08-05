@@ -1,5 +1,6 @@
 from datetime import datetime
-from flask import Flask, redirect, render_template, request, url_for, jsonify, session, CORS
+from flask import Flask, redirect, render_template, request, url_for, jsonify, session
+from flask_cors import CORS
 import sqlite3
 import re
 
