@@ -995,13 +995,27 @@ def api_listar_produtos():
 
 @app.route('/api/mesas', methods=['GET'])
 def get_mesas():
-    mesas = [
-        {"numero": 1, "disponivel": True},
-        {"numero": 2, "disponivel": False},
-        {"numero": 3, "disponivel": True},
-        {"numero": 4, "disponivel": True}
-    ]
-    return {"mesas": mesas}
+    conexao = conectar_db()
+    cursor = conexao.cursor()
+    
+    # Busca todas as mesas cadastradas no banco ordenadas pelo número
+    cursor.execute("SELECT numero, status FROM mesas ORDER BY numero")
+    mesas_db = cursor.fetchall()
+    conexao.close()
+    
+    lista_mesas = []
+    for m in mesas_db:
+        # Se o status no banco for 'Ocupada' (ou qualquer variação), mapeamos de acordo
+        status_banco = str(m[1]).strip().capitalize()
+        is_disponivel = status_banco == 'Disponivel' or status_banco == 'Livre'
+        
+        lista_mesas.append({
+            "numero": m[0],
+            "status": status_banco,
+            "disponivel": is_disponivel
+        })
+        
+    return jsonify({"mesas": lista_mesas}), 200
 
 
 @app.route("/sair")
