@@ -6,7 +6,7 @@ import re
 
 app = Flask(__name__)
 app.secret_key = "chave_super_secreta_restaurante"
-CORS(app)
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 def conectar_db():
     return sqlite3.connect("restaurante.db")
