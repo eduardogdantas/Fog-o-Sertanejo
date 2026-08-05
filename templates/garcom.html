@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Garçom - Fogão Sertanejo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen pb-10">
+
+    <!-- Cabeçalho do Garçom -->
+    <header class="bg-amber-800 text-white p-4 text-center shadow-md">
+        <h1 class="text-xl font-bold">📱 Atendimento de Mesas</h1>
+    </header>
+
+    <div class="max-w-md mx-auto p-4 mt-2">
+        
+        <!-- Card de Lançamento -->
+        <div class="bg-white rounded-xl shadow-md p-5 space-y-4">
+            <div>
+                <label class="block text-gray-700 font-bold mb-1">Número da Mesa:</label>
+                <input type="number" id="num-mesa" value="1" min="1" class="w-full border border-gray-300 rounded-lg p-3 text-center text-xl font-bold text-amber-900 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-amber-600">
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-bold mb-1">Selecione o Produto:</label>
+                <select id="select-produtos" class="w-full border border-gray-300 rounded-lg p-3 text-gray-800 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-amber-600">
+                    <!-- Preenchido via API -->
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-bold mb-1">Quantidade:</label>
+                <div class="flex items-center space-x-2">
+                    <button type="button" onclick="alterarQtd(-1)" class="bg-gray-200 px-4 py-3 rounded-lg font-bold text-lg hover:bg-gray-300">-</button>
+                    <input type="number" id="qtd-produto" value="1" min="1" class="w-full border border-gray-300 rounded-lg p-3 text-center text-lg font-bold bg-gray-50">
+                    <button type="button" onclick="alterarQtd(1)" class="bg-gray-200 px-4 py-3 rounded-lg font-bold text-lg hover:bg-gray-300">+</button>
+                </div>
+            </div>
+
+            <button onclick="enviarPedido()" class="w-full bg-green-600 text-white font-bold py-3.5 rounded-lg hover:bg-green-700 transition shadow-lg text-lg">
+                🚀 Enviar Pedido para Cozinha
+            </button>
+        </div>
+
+        <!-- Botão de Sair -->
+        <div class="mt-6 text-center">
+            <a href="/sair" class="text-red-600 font-semibold text-sm hover:underline">Sair da Conta</a>
+        </div>
+    </div>
+
+    <script>
+        // Botões de mais e menos para facilitar no celular
+        function alterarQtd(valor) {
+            let input = document.getElementById('qtd-produto');
+            let atual = parseInt(input.value) || 1;
+            let novo = atual + valor;
+            if (novo >= 1) input.value = novo;
+        }
+
+        // Carrega os produtos da API do seu app.py
+        async function carregarProdutos() {
+            try {
+                const res = await fetch('/api/produtos');
+                const dados = await res.json();
+                const select = document.getElementById('select-produtos');
+                select.innerHTML = '';
+                
+                dados.produtos.forEach(p => {
+                    let opt = document.createElement('option');
+                    opt.value = p.nome;
+                    opt.textContent = `${p.nome} - R$ ${p.preco.toFixed(2)} (Disp: ${p.quantidade})`;
+                    select.appendChild(opt);
+                });
+            } catch (e) {
+                console.error("Erro ao carregar cardápio:", e);
+            }
+        }
+
+        // Envia o pedido para a API do seu app.py
+        async function enviarPedido() {
+            const numero_mesa = document.getElementById('num-mesa').value;
+            const produto = document.getElementById('select-produtos').value;
+            const quantidade = parseInt(document.getElementById('qtd-produto').value);
+
+            if (!produto) {
+                alert("Selecione um produto!");
+                return;
+            }
+
+            const res = await fetch('/api/fazer_pedido', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ numero_mesa, produto, quantidade })
+            });
+
+            const respJson = await res.json();
+            if (res.ok) {
+                alert("✅ Pedido enviado com sucesso para a mesa " + numero_mesa + "!");
+                document.getElementById('qtd-produto').value = 1;
+                carregarProdutos(); // Atualiza o estoque/quantidades na tela
+            } else {
+                alert("❌ Erro: " + (respJson.erro || "Não foi possível lançar o pedido."));
+            }
+        }
+
+        carregarProdutos();
+    </script>
+</body>
+</html>

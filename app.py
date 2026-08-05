@@ -1,10 +1,11 @@
 from datetime import datetime
-from flask import Flask, redirect, render_template, request, url_for, jsonify, session
+from flask import Flask, redirect, render_template, request, url_for, jsonify, session, CORS
 import sqlite3
 import re
 
 app = Flask(__name__)
 app.secret_key = "chave_super_secreta_restaurante"
+CORS(app)
 
 def conectar_db():
     return sqlite3.connect("restaurante.db")
