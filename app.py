@@ -1,12 +1,11 @@
 from datetime import datetime
 from flask import Flask, redirect, render_template, request, url_for, jsonify, session
-from flask_cors import CORS
 import sqlite3
 import re
 
 app = Flask(__name__)
 app.secret_key = "chave_super_secreta_restaurante"
-CORS(app, resources={r"/api/*": {"origins": "*"}})
+
 
 def conectar_db():
     return sqlite3.connect("restaurante.db")
@@ -76,7 +75,6 @@ def home():
     return render_template("index.html", mesas=mesas, por_praca=por_praca, estoque_itens=estoque_itens, vendas_fechadas=vendas_fechadas)
 
 
-# Aceita tanto /mesa/1 quanto /ver_mesa/1 para evitar erro 404!
 @app.route("/mesa/<int:numero_mesa>")
 @app.route("/ver_mesa/<int:numero_mesa>")
 def ver_mesa(numero_mesa):
@@ -153,7 +151,6 @@ def adicionar_pedido(numero_mesa):
     conexao = conectar_db()
     cursor = conexao.cursor()
 
-    # 1. Busca o preço e a quantidade atual do produto no estoque
     cursor.execute("SELECT preco, quantidade FROM estoque WHERE nome = ?", (produto,))
     resultado = cursor.fetchone()
     
@@ -161,17 +158,14 @@ def adicionar_pedido(numero_mesa):
         preco_unitario = resultado[0]
         estoque_atual = resultado[1]
         
-        # 2. Subtrai do estoque e garante que não fique negativo
         novo_estoque = estoque_atual - quantidade
         if novo_estoque < 0:
             novo_estoque = 0 
             
-        # 3. Atualiza o estoque no banco
         cursor.execute("UPDATE estoque SET quantidade = ? WHERE nome = ?", (novo_estoque, produto))
     else:
         preco_unitario = 0.0
 
-    # 4. Insere o pedido na mesa
     cursor.execute(
         "INSERT INTO pedidos (mesa_numero, produto, quantidade, preco) VALUES (?, ?, ?, ?)",
         (numero_mesa, produto, quantidade, preco_unitario),
@@ -282,39 +276,59 @@ def gerenciar_caixa():
         acao = request.form.get("acao")
 
         if acao == "abrir":
-            valor = float(request.form.get("valor", 0))
+            # Se o usuário deixar vazio, o float("") daria erro, 
+            # então pegamos o valor e garantimos que vira 0.0 se estiver vazio
+            valor_raw = request.form.get("valor", "")
+            try:
+                # Substitui vírgula por ponto para não quebrar o cálculo
+                valor = float(valor_raw.replace(",", ".")) if valor_raw.strip() != "" else 0.0
+            except ValueError:
+                valor = 0.0
+            
+            data_hora_agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            
             cursor.execute(
-                "INSERT INTO caixa (status, valor_inicial) VALUES ('aberto', ?)",
-                (valor,),
+                "INSERT INTO caixa (status, valor_inicial, data) VALUES ('aberto', ?, ?)",
+                (valor, data_hora_agora),
             )
             conexao.commit()
 
         elif acao == "fechar":
-            cursor.execute(
-                "SELECT mesa_numero, produto, quantidade, preco FROM pedidos"
-            )
-            itens_vendidos = cursor.fetchall()
+            conexao = sqlite3.connect("restaurante.db")
+            cursor = conexao.cursor()
 
-            total_vendas = 0
-            data_atual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            # 1. Pega o ID e a data/hora exata em que ESTE caixa foi aberto
+            cursor.execute("SELECT id, data FROM caixa WHERE status = 'aberto' ORDER BY id DESC LIMIT 1")
+            caixa_aberto = cursor.fetchone()
 
-            for item in itens_vendidos:
-                mesa, produto, qtd, preco = item
-                subtotal = float(qtd) * float(preco)
-                total_vendas += subtotal
+            if caixa_aberto:
+                caixa_id = caixa_aberto[0]
+                data_hora_abertura = caixa_aberto[1] # Ex: "2026-08-06 21:50:00"
 
+                # Se por acaso a data do caixa estiver vazia, usamos o horário atual de segurança
+                if not data_hora_abertura:
+                    data_hora_abertura = datetime.now().strftime("%Y-%m-%d 00:00:00")
+
+                # 2. Soma SOMENTE as receitas geradas APÓS a hora que este caixa abriu
                 cursor.execute(
-                    "INSERT INTO financeiro (descricao, valor, tipo, data) VALUES (?, ?, ?, ?)",
-                    (f"Venda Mesa {mesa}: {produto} (x{qtd})", subtotal, "Receita", data_atual),
+                    "SELECT SUM(valor) FROM financeiro WHERE tipo = 'Receita' AND data >= ?", 
+                    (data_hora_abertura,)
+                )
+                resultado = cursor.fetchone()[0]
+                total_vendas = float(resultado) if resultado else 0.0
+
+                # 3. Atualiza o caixa atual com o valor correto do turno
+                cursor.execute(
+                    "UPDATE caixa SET status = 'fechado', valor_final = ? WHERE id = ?", 
+                    (total_vendas, caixa_id)
                 )
 
-            cursor.execute(
-                "UPDATE caixa SET status = 'fechado', valor_final = ? WHERE status = 'aberto'",
-                (total_vendas,),
-            )
+            # Limpa os pedidos das mesas
             cursor.execute("DELETE FROM pedidos")
             cursor.execute("UPDATE mesas SET status = 'Disponivel'")
+            
             conexao.commit()
+            conexao.close()
 
         return redirect("/caixa")
 
@@ -601,11 +615,33 @@ def relatorios():
 
 @app.route('/vendas')
 def vendas():
+    if not session.get("logado"):
+        return redirect(url_for("login"))
+
     conexao = sqlite3.connect("restaurante.db")
     cursor = conexao.cursor()
     
+    # Busca as mesas cadastradas
     cursor.execute("SELECT numero, status, praca_id FROM mesas ORDER BY numero") 
-    mesas = cursor.fetchall()
+    mesas_raw = cursor.fetchall()
+
+    # Recalcula dinamicamente se a mesa está ocupada com base nos pedidos ativos
+    mesas = []
+    for m in mesas_raw:
+        num_mesa = m[0]
+        praca_id = m[2]
+        
+        cursor.execute("SELECT COUNT(*) FROM pedidos WHERE CAST(mesa_numero AS TEXT) = CAST(? AS TEXT)", (num_mesa,))
+        tem_pedidos = cursor.fetchone()[0] > 0
+        
+        status_atualizado = "Ocupada" if tem_pedidos else "Disponivel"
+        
+        # Opcional: Atualiza também no banco para manter sincronizado
+        cursor.execute("UPDATE mesas SET status = ? WHERE numero = ?", (status_atualizado, num_mesa))
+        
+        mesas.append((num_mesa, status_atualizado, praca_id))
+    
+    conexao.commit()
 
     por_praca = {} 
     for mesa in mesas:
@@ -818,10 +854,6 @@ def login():
             except IndexError:
                 session["permissao"] = "admin" if usuario == "admin" else "comum"
                 
-            # Se for usuário comum (garçom), vai direto para o app mobile
-            if session["permissao"] == "comum":
-                return redirect(url_for("tela_garcom"))
-                
             return redirect(url_for("home"))
         else:
             return render_template("login.html", erro="Usuário ou senha incorretos!")
@@ -829,15 +861,8 @@ def login():
     return render_template("login.html")
 
 
-@app.route("/garcom")
-def tela_garcom():
-    if not session.get("logado"):
-        return redirect(url_for("login"))
-    return render_template("garcom.html")
-
-
 # ==========================================
-# API DE COMANDAS ATIVAS
+# APIs PARA O FLUTTER
 # ==========================================
 @app.route('/api/comandas-ativas')
 def comandas_ativas():
@@ -998,7 +1023,6 @@ def get_mesas():
     conexao = conectar_db()
     cursor = conexao.cursor()
     
-    # Busca todas as mesas cadastradas
     cursor.execute("SELECT numero, status FROM mesas ORDER BY numero")
     mesas_db = cursor.fetchall()
     
@@ -1006,11 +1030,9 @@ def get_mesas():
     for m in mesas_db:
         num_mesa = m[0]
         
-        # Verifica se realmente existem pedidos ativos para esta mesa no banco
         cursor.execute("SELECT COUNT(*) FROM pedidos WHERE CAST(mesa_numero AS TEXT) = CAST(? AS TEXT)", (num_mesa,))
         tem_pedidos = cursor.fetchone()[0] > 0
         
-        # Se tem pedidos, força o status como Ocupada; se não, Disponível
         status_real = "Ocupada" if tem_pedidos else "Disponível"
         is_disponivel = not tem_pedidos
         

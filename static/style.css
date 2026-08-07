@@ -68,6 +68,7 @@ body {
     box-shadow: 0 2px 4px rgba(0,0,0,0.02);
     position: relative;
     z-index: 5;
+    flex-shrink: 0;
 }
 
 .btn-ferramenta {
@@ -78,13 +79,13 @@ body {
     background: none;
     border: none;
     cursor: pointer;
-    width: 85px;
+    width: 95px;
     padding: 8px;
     border-radius: 10px;
     transition: background 0.2s;
 }
 
-.btn-ferramenta:hover {
+.btn-ferramenta:hover, .btn-ferramenta.ativo {
     background-color: #f1f5f9;
 }
 

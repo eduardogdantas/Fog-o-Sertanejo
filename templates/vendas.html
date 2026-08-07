@@ -60,8 +60,9 @@
             background-color: #ffffff;
             display: flex;
             gap: 15px;
-            padding: 10px 20px;
+            padding: 12px 20px;
             border-bottom: 1px solid #e2e8f0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
             align-items: center;
             flex-shrink: 0;
         }
@@ -74,8 +75,8 @@
             background: none;
             border: none;
             cursor: pointer;
-            width: 85px;
-            padding: 6px;
+            width: 95px;
+            padding: 8px;
             border-radius: 10px;
             transition: background 0.2s;
         }
@@ -84,18 +85,19 @@
             background-color: #f1f5f9;
         }
 
-        .btn-ferramenta .icone { font-size: 20px; margin-bottom: 2px; }
-        .btn-ferramenta .texto { font-size: 11px; font-weight: 700; color: #475569; text-transform: uppercase; }
-        .btn-ferramenta.sair .texto { color: #ef4444; }
+        .btn-ferramenta .icone { font-size: 22px; margin-bottom: 4px; }
+        .btn-ferramenta .texto { font-size: 11px; font-weight: 700; color: #475569; text-transform: uppercase; text-align: center; }
 
-        /* 3. BARRA DE STATUS */
+        /* 3. BARRA DE STATUS (PADRONIZADA IGUAL AO ESTOQUE E CAIXA) */
         .barra-status {
             background-color: #2c5ca4;
             color: #ffffff;
             text-align: center;
-            padding: 8px;
+            padding: 10px;
             font-size: 14px;
             font-weight: bold;
+            letter-spacing: 0.5px;
+            width: 100%;
             flex-shrink: 0;
         }
 
@@ -114,12 +116,10 @@
             gap: 40px 15px !important;
             padding: 15px 0 30px 0;
             background: transparent !important;
-            border-radius: 0 !important;
-            box-shadow: none !important;
             width: 100%;
         }
 
-        /* LAYOUT DAS PRAÇAS EM GRID 2 COLUNAS LADO A LADO */
+        /* LAYOUT DAS PRAÇAS EM GRID 2 COLUNAS */
         #view-pracas {
             display: none;
             grid-template-columns: repeat(2, 1fr) !important;
@@ -127,7 +127,6 @@
             width: 100%;
         }
 
-        /* JANELA QUADRADA DA PRAÇA */
         .painel-praca {
             background-color: #ffffff;
             border-radius: 12px;
@@ -135,7 +134,6 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
             border: 1px solid #e2e8f0;
             width: 100%;
-            box-sizing: border-box;
         }
 
         .cabecalho-praca {
@@ -191,7 +189,6 @@
             box-shadow: 0 6px 12px rgba(0,0,0,0.12);
         }
 
-        /* CORES DAS MESAS */
         .card-mesa.disponivel, .card-mesa.livre { background-color: #10b981 !important; color: #fff !important; }
         .card-mesa.ocupada { background-color: #f97316 !important; color: #fff !important; }
 
@@ -455,7 +452,7 @@
         </div>
     </div>
 
-    <!-- MODAIS DO SISTEMA -->
+    <!-- MODAL DE BALCÃO -->
     <div id="modal-balcao" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
@@ -496,73 +493,64 @@
         </div>
     </div>
 
+    <!-- MODAL DE CUPOM -->
     <div id="modal-cupom" class="modal-overlay">
-    <div class="modal-content" style="width: 380px;">
-        <div class="modal-header">
-            <span>🖨️ Imprimir Cupom</span>
-            <button type="button" class="modal-close" onclick="fecharModalCupom()">✕</button>
-        </div>
-        <div class="modal-body">
-            <form action="/imprimir_cupom" method="GET" target="_blank">
-                
-                <!-- DIGITAR O NÚMERO DA MESA -->
-                <div class="modal-group">
-                    <label>Digite o Número da Mesa:</label>
-                    <input type="number" id="input-numero-mesa-cupom" placeholder="Ex: 1" min="1" oninput="sincronizarDigitacaoMesa(this.value)" style="font-size: 16px; font-weight: bold; text-align: center; color: #1e293b;">
-                </div>
-
-                <p style="text-align: center; color: #94a3b8; font-size: 11px; margin-bottom: 10px;">— OU SELECIONE DA LISTA —</p>
-
-                <!-- LISTA SELEÇÃO DE MESA -->
-                <div class="modal-group">
-                    <select id="select-mesa-cupom" name="numero_mesa" onchange="sincronizarSelectMesa(this.value)" required>
-                        <option value="" disabled selected>Escolha uma mesa...</option>
-                        {% for mesa in mesas %}
-                            <option value="{{ mesa[0] }}">Mesa {{ mesa[0] }} - {{ mesa[1] }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn-cancelar" onclick="fecharModalCupom()">Cancelar</button>
-                    <button type="submit" class="btn-salvar" onclick="fecharModalCupom()">Imprimir</button>
-                </div>
-            </form>
+        <div class="modal-content" style="width: 380px;">
+            <div class="modal-header">
+                <span>🖨️ Imprimir Cupom</span>
+                <button type="button" class="modal-close" onclick="fecharModalCupom()">✕</button>
+            </div>
+            <div class="modal-body">
+                <form action="/imprimir_cupom" method="GET" target="_blank">
+                    <div class="modal-group">
+                        <label>Digite o Número da Mesa:</label>
+                        <input type="number" id="input-numero-mesa-cupom" placeholder="Ex: 1" min="1" oninput="sincronizarDigitacaoMesa(this.value)" style="font-size: 16px; font-weight: bold; text-align: center; color: #1e293b;">
+                    </div>
+                    <p style="text-align: center; color: #94a3b8; font-size: 11px; margin-bottom: 10px;">— OU SELECIONE DA LISTA —</p>
+                    <div class="modal-group">
+                        <select id="select-mesa-cupom" name="numero_mesa" onchange="sincronizarSelectMesa(this.value)" required>
+                            <option value="" disabled selected>Escolha uma mesa...</option>
+                            {% for mesa in mesas %}
+                                <option value="{{ mesa[0] }}">Mesa {{ mesa[0] }} - {{ mesa[1] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-cancelar" onclick="fecharModalCupom()">Cancelar</button>
+                        <button type="submit" class="btn-salvar" onclick="fecharModalCupom()">Imprimir</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 
     <!-- MODAL REIMPRIMIR COM FILTRO POR DATA -->
-<div id="modal-reimprimir" class="modal-overlay">
-    <div class="modal-content" style="width: 420px;">
-        <div class="modal-header">
-            <span>🔄 Reimprimir Comanda / 2ª Via</span>
-            <button type="button" class="modal-close" onclick="fecharModalReimprimir()">✕</button>
-        </div>
-        <div class="modal-body">
-            <form action="/reimprimir_fechada" method="GET" target="_blank">
-                <!-- CAMPOS DE SELEÇÃO DE DATA -->
-                <div class="modal-group">
-                    <label>1. Selecione a Data:</label>
-                    <input type="date" id="filtro-data-reimprimir" onchange="carregarCuponsPorData()" style="cursor: pointer;">
-                </div>
-
-                <!-- LISTA DE CUPONS DA DATA SELECIONADA -->
-                <div class="modal-group">
-                    <label>2. Escolha o Cupom Fechado:</label>
-                    <select id="select-cupons-historico" name="id_venda" required>
-                        <option value="" disabled selected>Selecione uma data primeiro...</option>
-                    </select>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn-cancelar" onclick="fecharModalReimprimir()">Cancelar</button>
-                    <button type="submit" class="btn-salvar" onclick="fecharModalReimprimir()">Imprimir 2ª Via</button>
-                </div>
-            </form>
+    <div id="modal-reimprimir" class="modal-overlay">
+        <div class="modal-content" style="width: 420px;">
+            <div class="modal-header">
+                <span>🔄 Reimprimir Comanda / 2ª Via</span>
+                <button type="button" class="modal-close" onclick="fecharModalReimprimir()">✕</button>
+            </div>
+            <div class="modal-body">
+                <form action="/reimprimir_fechada" method="GET" target="_blank">
+                    <div class="modal-group">
+                        <label>1. Selecione a Data:</label>
+                        <input type="date" id="filtro-data-reimprimir" onchange="carregarCuponsPorData()" style="cursor: pointer;">
+                    </div>
+                    <div class="modal-group">
+                        <label>2. Escolha o Cupom Fechado:</label>
+                        <select id="select-cupons-historico" name="id_venda" required>
+                            <option value="" disabled selected>Selecione uma data primeiro...</option>
+                        </select>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-cancelar" onclick="fecharModalReimprimir()">Cancelar</button>
+                        <button type="submit" class="btn-salvar" onclick="fecharModalReimprimir()">Imprimir 2ª Via</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 
     <!-- SCRIPTS DE NAVEGAÇÃO E LÓGICA -->
     <script>
@@ -595,7 +583,6 @@
             }
         }
 
-        /* GERENCIAMENTO DO MODAL DE COMANDAS */
         function abrirModalComandas() {
             document.getElementById('modal-comandas').style.display = 'flex';
             atualizarComandasAtivas();
@@ -607,7 +594,6 @@
 
         function atualizarComandasAtivas() {
             const container = document.getElementById('lista-comandas-conteudo');
-
             fetch('/api/comandas-ativas')
                 .then(response => {
                     if (!response.ok) throw new Error("Erro na requisição");
@@ -625,17 +611,13 @@
                 });
         }
 
-        /* ABRIR JANELA FLUTUANTE SIMPLES E CONFIGURAR BOTÃO DE IMPRESSÃO */
         function verDetalhesMesaModal(numeroMesa) {
             document.getElementById('detalhe-mesa-titulo').innerText = `Mesa ${numeroMesa}`;
-            
             const btnImprimir = document.getElementById('btn-imprimir-modal-detalhes');
             if (btnImprimir) {
                 btnImprimir.href = `/imprimir_cupom?numero_mesa=${numeroMesa}`;
             }
-
             document.getElementById('modal-detalhes-mesa').style.display = 'flex';
-            
             const containerItens = document.getElementById('detalhe-mesa-itens');
             containerItens.innerHTML = '<p style="text-align: center; color: #94a3b8; padding: 10px;">Buscando consumo...</p>';
 
@@ -643,10 +625,8 @@
                 .then(res => res.json())
                 .then(data => {
                     const comanda = data.comandas.find(c => c.numero_mesa == numeroMesa);
-                    
                     if (comanda && comanda.itens && comanda.itens.length > 0) {
                         let html = '<table class="tabela-itens-comanda"><tbody>';
-                        
                         comanda.itens.forEach(item => {
                             html += `
                                 <tr>
@@ -654,7 +634,6 @@
                                     <td style="padding: 8px 0; font-weight: 600;">${item.nome}</td>
                                 </tr>`;
                         });
-                        
                         html += '</tbody></table>';
                         containerItens.innerHTML = html;
                     } else {
@@ -669,71 +648,56 @@
         function fecharModalDetalhesMesa() {
             document.getElementById('modal-detalhes-mesa').style.display = 'none';
         }
-        /* MÁSCARA E LÓGICA DO FILTRO DE DATA NO REIMPRIMIR */
-function abrirModalReimprimir() {
-    document.getElementById('modal-reimprimir').style.display = 'flex';
-    
-    // Define o campo de data automaticamente para o dia de hoje (YYYY-MM-DD)
-    const hoje = new Date().toISOString().split('T')[0];
-    const campoData = document.getElementById('filtro-data-reimprimir');
-    campoData.value = hoje;
-    
-    // Carrega os cupons do dia de hoje
-    carregarCuponsPorData();
-}
 
-function fecharModalReimprimir() {
-    document.getElementById('modal-reimprimir').style.display = 'none';
-}
+        function abrirModalReimprimir() {
+            document.getElementById('modal-reimprimir').style.display = 'flex';
+            const hoje = new Date().toISOString().split('T')[0];
+            document.getElementById('filtro-data-reimprimir').value = hoje;
+            carregarCuponsPorData();
+        }
 
-function carregarCuponsPorData() {
-    const dataSelecionada = document.getElementById('filtro-data-reimprimir').value;
-    const selectCupons = document.getElementById('select-cupons-historico');
-    
-    selectCupons.innerHTML = '<option value="" disabled selected>Buscando cupons...</option>';
+        function fecharModalReimprimir() {
+            document.getElementById('modal-reimprimir').style.display = 'none';
+        }
 
-    fetch(`/api/historico-vendas?data=${dataSelecionada}`)
-        .then(res => res.json())
-        .then(data => {
-            if (!data.vendas || data.vendas.length === 0) {
-                selectCupons.innerHTML = '<option value="" disabled selected>Nenhum cupom nesta data.</option>';
-                return;
-            }
+        function carregarCuponsPorData() {
+            const dataSelecionada = document.getElementById('filtro-data-reimprimir').value;
+            const selectCupons = document.getElementById('select-cupons-historico');
+            selectCupons.innerHTML = '<option value="" disabled selected>Buscando cupons...</option>';
 
-            let html = '<option value="" disabled selected>Escolha o cupom desejado...</option>';
-            data.vendas.forEach(venda => {
-                html += `<option value="${venda.id}">Mesa ${venda.mesa} - R$ ${venda.total} (${venda.hora})</option>`;
-            });
+            fetch(`/api/historico-vendas?data=${dataSelecionada}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.vendas || data.vendas.length === 0) {
+                        selectCupons.innerHTML = '<option value="" disabled selected>Nenhum cupom nesta data.</option>';
+                        return;
+                    }
+                    let html = '<option value="" disabled selected>Escolha o cupom desejado...</option>';
+                    data.vendas.forEach(venda => {
+                        html += `<option value="${venda.id}">Mesa ${venda.mesa} - R$ ${venda.total} (${venda.hora})</option>`;
+                    });
+                    selectCupons.innerHTML = html;
+                })
+                .catch(() => {
+                    selectCupons.innerHTML = '<option value="" disabled selected>Erro ao carregar cupons.</option>';
+                });
+        }
 
-            selectCupons.innerHTML = html;
-        })
-        .catch(() => {
-            selectCupons.innerHTML = '<option value="" disabled selected>Erro ao carregar cupons.</option>';
-        });
-}
-/* SINCRONIZA O CAMPO DIGITADO COM O DROPDOWN */
-function sincronizarDigitacaoMesa(valor) {
-    const select = document.getElementById('select-mesa-cupom');
-    if (valor) {
-        select.value = valor;
-    } else {
-        select.value = "";
-    }
-}
+        function sincronizarDigitacaoMesa(valor) {
+            const select = document.getElementById('select-mesa-cupom');
+            select.value = valor ? valor : "";
+        }
 
-/* SINCRONIZA O DROPDOWN COM O CAMPO DIGITADO */
-function sincronizarSelectMesa(valor) {
-    const input = document.getElementById('input-numero-mesa-cupom');
-    input.value = valor;
-}
+        function sincronizarSelectMesa(valor) {
+            document.getElementById('input-numero-mesa-cupom').value = valor;
+        }
 
-/* LIMPA OS CAMPOS AO FECHAR O MODAL */
-function fecharModalCupom() {
-    document.getElementById('modal-cupom').style.display = 'none';
-    document.getElementById('input-numero-mesa-cupom').value = '';
-    document.getElementById('select-mesa-cupom').value = '';
-}
-        /* RENDERIZAÇÃO DAS COMANDAS NO MODAL (COM BOTÃO IMPRIMIR) */
+        function fecharModalCupom() {
+            document.getElementById('modal-cupom').style.display = 'none';
+            document.getElementById('input-numero-mesa-cupom').value = '';
+            document.getElementById('select-mesa-cupom').value = '';
+        }
+
         function renderizarComandas(comandas, container) {
             let html = '';
             comandas.forEach(comanda => {
@@ -745,7 +709,6 @@ function fecharModalCupom() {
                     </div>
                     <table class="tabela-itens-comanda">
                         <tbody>`;
-                
                 if (comanda.itens && comanda.itens.length > 0) {
                     comanda.itens.forEach(item => {
                         html += `
@@ -758,7 +721,6 @@ function fecharModalCupom() {
                 } else {
                     html += `<tr><td colspan="3" style="font-style: italic; color: #94a3b8;">Nenhum item lançado.</td></tr>`;
                 }
-
                 html += `
                         </tbody>
                     </table>
@@ -768,14 +730,12 @@ function fecharModalCupom() {
                     </div>
                 </div>`;
             });
-
             container.innerHTML = html;
         }
 
         function varrerMesasOcupadasDoDOM(container) {
             const mesasAdicionadas = new Set();
             const elementosOcupados = document.querySelectorAll('.card-mesa.ocupada');
-            
             if (elementosOcupados.length === 0) {
                 container.innerHTML = `
                     <div style="text-align: center; color: #64748b; padding: 30px;">
@@ -784,16 +744,13 @@ function fecharModalCupom() {
                     </div>`;
                 return;
             }
-
             let html = '';
             elementosOcupados.forEach(card => {
                 const numEl = card.querySelector('.num-mesa');
                 const textoMesa = numEl ? numEl.innerText : "Mesa";
                 const numeroMesa = textoMesa.replace(/\D/g, '');
-
                 if (numeroMesa && !mesasAdicionadas.has(numeroMesa)) {
                     mesasAdicionadas.add(numeroMesa);
-
                     html += `
                     <div class="card-comanda-item">
                         <div class="comanda-topo">
@@ -808,16 +765,13 @@ function fecharModalCupom() {
                     </div>`;
                 }
             });
-
             container.innerHTML = html;
         }
 
-        /* DEMAIS FUNÇÕES DO SISTEMA */
         function realizarLogin(event) {
             event.preventDefault();
             const usuarioInput = document.getElementById("usuario").value;
             const senhaInput = document.getElementById("senha").value;
-
             if (usuarioInput === "admin" && senhaInput === "1234") {
                 localStorage.setItem("usuarioLogado", "true");
                 document.getElementById("login-container").style.display = "none";
@@ -825,12 +779,6 @@ function fecharModalCupom() {
             } else {
                 document.getElementById("erro-msg").style.display = "block";
             }
-        }
-
-        function sairDoSistema() {
-            localStorage.removeItem("usuarioLogado");
-            document.getElementById("app-principal").style.display = "none";
-            document.getElementById("login-container").style.display = "flex";
         }
 
         function abrirModalBalcao() { document.getElementById('modal-balcao').style.display = 'flex'; }
