@@ -6,7 +6,7 @@ import re
 
 app = Flask(__name__)
 app.secret_key = "chave_super_secreta_restaurante"
-CORS(app)
+CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
 
 
 def conectar_db():
@@ -835,32 +835,25 @@ def imprimir_cupom():
     )
 
 
-@app.route("/login", methods=["GET", "POST"])
+@app.route('/api/login', methods=['POST', 'OPTIONS'])
 def login():
-    if request.method == "POST":
-        usuario = request.form.get("usuario")
-        senha = request.form.get("senha")
-        
-        conexao = conectar_db()
-        cursor = conexao.cursor()
-        cursor.execute("SELECT * FROM usuarios WHERE nome = ? AND senha = ?", (usuario, senha))
-        user = cursor.fetchone()
-        conexao.close()
-        
-        if user:
-            session["logado"] = True
-            session["usuario_nome"] = usuario
-            
-            try:
-                session["permissao"] = user[3]
-            except IndexError:
-                session["permissao"] = "admin" if usuario == "admin" else "comum"
-                
-            return redirect(url_for("home"))
-        else:
-            return render_template("login.html", erro="Usuário ou senha incorretos!")
-            
-    return render_template("login.html")
+    # O navegador envia um OPTIONS antes do POST. Precisamos responder 200 OK para liberar.
+    if request.method == 'OPTIONS':
+        response = jsonify({'status': 'OK'})
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+        response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+        return response, 200
+
+    # Lógica normal do seu login
+    dados = request.get_json() or {}
+    usuario = dados.get('usuario', '')
+    senha = dados.get('senha', '')
+
+    if usuario == 'eduardo' and senha == '123':
+        return jsonify({"sucesso": True, "mensagem": "Logado com sucesso"}), 200
+    else:
+        return jsonify({"sucesso": False, "mensagem": "Usuário ou senha inválidos"}), 401
 
 
 # ==========================================
