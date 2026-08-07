@@ -1,10 +1,12 @@
 from datetime import datetime
 from flask import Flask, redirect, render_template, request, url_for, jsonify, session
+from flask_cors import CORS
 import sqlite3
 import re
 
 app = Flask(__name__)
 app.secret_key = "chave_super_secreta_restaurante"
+CORS(app)
 
 
 def conectar_db():
@@ -897,9 +899,10 @@ def comandas_ativas():
             subtotal = float(qtd or 0) * float(preco or 0)
             total_mesa += subtotal
             lista_itens.append({
-                'nome': nome_prod,
-                'quantidade': int(qtd or 1),
-                'preco': float(preco or 0)
+                'produto': nome_prod,          # Nome do produto consumido
+                'quantidade': int(qtd or 1),    # Quantidade pedida
+                'preco': float(preco or 0),     # Preço unitário
+                'subtotal': subtotal            # Subtotal do item
             })
             
         comandas.append({
